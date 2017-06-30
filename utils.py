@@ -46,7 +46,7 @@ class WeightReader:
     def reset(self):
         self.offset = 4
 
-def interp_netout(image, netout):
+def interpret_netout(image, netout):
     boxes = []
 
     # interpret the output by the network
@@ -98,8 +98,9 @@ def interp_netout(image, netout):
             ymin  = int((box.y - box.h/2) * image.shape[0])
             ymax  = int((box.y + box.h/2) * image.shape[0])
 
-            cv2.rectangle(image, (xmin,ymin), (xmax,ymax), (255,0,0), 3)
-            cv2.putText(image, LABELS[max_indx], (xmin, ymin - 12), 0, 1e-3 * image.shape[0], (255,0,0), 1)
+
+            cv2.rectangle(image, (xmin,ymin), (xmax,ymax), COLORS[max_indx], 3)
+            cv2.putText(image, LABELS[max_indx], (xmin, ymin - 12), 0, 1e-3 * image.shape[0], (0,255,0), 3)
             
     return image
 
