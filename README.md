@@ -1,23 +1,11 @@
-Introduction
+This is a barebone implementation of YOLOv2 in Keras.
 
-	This is a proof of concept implementation of YOLO using Keras.
+# Demo on a street video
 
-Instruction
+<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center">![Foo](https://j.gifs.com/j2o0Yz.gif)</p></a>
 
-	Download VOC data and pre-trained weights
-		Download VOC data
-		Download pre-trained weights
-		Specify directory for annotation
-		Specify directory for images
-		Specify directory for trained weights
-	Follow the steps in the notebook for a walkthrough the whole process
-		Initialization of parameters
-		Construct the network
-		Load the pretrained weights
-		Proprocess the data
-		Train the network (the weights of the last layers are randomized before training)
-		Perform detection on an image
+# Usage
 
-Notes
-	
-	
++ Download VOC data from http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar 
++ Download pre-trained weights from http://pjreddie.com/media/files/tiny-yolo-voc.weight
++ Refer to the notebook for a step through implementation of YOLOv2 from scratch (both training and testing).
