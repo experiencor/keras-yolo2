@@ -99,8 +99,8 @@ def interpret_netout(image, netout):
             ymax  = int((box.y + box.h/2) * image.shape[0])
 
 
-            cv2.rectangle(image, (xmin,ymin), (xmax,ymax), COLORS[max_indx], 3)
-            cv2.putText(image, LABELS[max_indx], (xmin, ymin - 12), 0, 1e-3 * image.shape[0], (0,255,0), 3)
+            cv2.rectangle(image, (xmin,ymin), (xmax,ymax), COLORS[max_indx], 2)
+            cv2.putText(image, LABELS[max_indx], (xmin, ymin - 12), 0, 1e-3 * image.shape[0], (0,255,0), 2)
             
     return image
 
