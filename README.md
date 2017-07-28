@@ -2,7 +2,7 @@ This is a barebone implementation of YOLOv2 in Keras. The two original papers ar
 
 # Demo on a street video
 
-<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center">![Foo](https://j.gifs.com/j2o0Yz.gif)</p></a>
+<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center">![Foo](https://j.gifs.com/oY3zDB.gif)</p></a>
 
 # Usage
 
