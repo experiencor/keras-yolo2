@@ -32,7 +32,7 @@ class BoundBox:
             if x2 < x3:
                 return 0
             else:
-                return min(x2,x4) - x1
+                return min(x2,x4) - x3
 
 class WeightReader:
     def __init__(self, weight_file):
