@@ -6,6 +6,6 @@ This is a barebone implementation of YOLOv2 in Keras. The two original papers ar
 
 # Usage
 
-+ Download VOC data from http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
-+ Download pre-trained weights from http://pjreddie.com/media/files/tiny-yolo-voc.weights
++ Download COCO detection data from http://cocodataset.org/#download
++ Download pre-trained weights from https://pjreddie.com/media/files/yolo-voc.weights
 + Refer to the notebook for a step through implementation of YOLOv2 from scratch (both training and testing).

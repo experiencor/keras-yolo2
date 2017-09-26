@@ -6,33 +6,29 @@ import copy
 import cv2
 
 class BoundBox:
-    def __init__(self, class_num):
-        self.x, self.y, self.w, self.h, self.c = 0., 0., 0., 0., 0.
-        self.probs = np.zeros((class_num,))
+    def __init__(self, x, y, w, h, c = None, classes = None):
+        self.x     = x
+        self.y     = y
+        self.w     = w
+        self.h     = h
         
-    def iou(self, box):
-        intersection = self.intersect(box)
-        union = self.w*self.h + box.w*box.h - intersection
-        return intersection/union
+        self.c     = c
+        self.classes = classes
+
+        self.label = -1
+        self.score = -1
+
+    def get_label(self):
+        if self.label == -1:
+            self.label = np.argmax(self.classes)
         
-    def intersect(self, box):
-        width  = self.__overlap([self.x-self.w/2, self.x+self.w/2], [box.x-box.w/2, box.x+box.w/2])
-        height = self.__overlap([self.y-self.h/2, self.y+self.h/2], [box.y-box.h/2, box.y+box.h/2])
-        return width * height
-        
-    def __overlap(self, interval_a, interval_b):
-        x1, x2 = interval_a
-        x3, x4 = interval_b
-        if x3 < x1:
-            if x4 < x1:
-                return 0
-            else:
-                return min(x2,x4) - x1
-        else:
-            if x2 < x3:
-                return 0
-            else:
-                return min(x2,x4) - x3
+        return self.label
+    
+    def get_score(self):
+        if self.score == -1:
+            self.score = self.classes[self.get_label()]
+            
+        return self.score
 
 class WeightReader:
     def __init__(self, weight_file):
@@ -46,218 +42,123 @@ class WeightReader:
     def reset(self):
         self.offset = 4
 
-def interpret_netout(image, netout):
+def normalize(image):
+    image = image / 255.
+    
+    return image
+
+def bbox_iou(box1, box2):
+    x1_min  = box1.x - box1.w/2
+    x1_max  = box1.x + box1.w/2
+    y1_min  = box1.y - box1.h/2
+    y1_max  = box1.y + box1.h/2
+    
+    x2_min  = box2.x - box2.w/2
+    x2_max  = box2.x + box2.w/2
+    y2_min  = box2.y - box2.h/2
+    y2_max  = box2.y + box2.h/2
+    
+    intersect_w = interval_overlap([x1_min, x1_max], [x2_min, x2_max])
+    intersect_h = interval_overlap([y1_min, y1_max], [y2_min, y2_max])
+    
+    intersect = intersect_w * intersect_h
+    
+    union = box1.w * box1.h + box2.w * box2.h - intersect
+    
+    return float(intersect) / union
+    
+def interval_overlap(interval_a, interval_b):
+    x1, x2 = interval_a
+    x3, x4 = interval_b
+
+    if x3 < x1:
+        if x4 < x1:
+            return 0
+        else:
+            return min(x2,x4) - x1
+    else:
+        if x2 < x3:
+            return 0
+        else:
+            return min(x2,x4) - x3  
+
+def draw_boxes(image, boxes, labels):
+    
+    for box in boxes:
+        xmin  = int((box.x - box.w/2) * image.shape[1])
+        xmax  = int((box.x + box.w/2) * image.shape[1])
+        ymin  = int((box.y - box.h/2) * image.shape[0])
+        ymax  = int((box.y + box.h/2) * image.shape[0])
+
+        cv2.rectangle(image, (xmin,ymin), (xmax,ymax), (255,0,0), 2)
+        cv2.putText(image, labels[box.get_label()] + ' ' + str(box.get_score()), 
+                    (xmin, ymin + 16), 
+                    0, 
+                    1e-3 * image.shape[0], 
+                    (255,0,0), 2)
+        
+    return image       
+        
+def decode_netout(netout, threshold, anchors, nb_class):
+    grid_h, grid_w, nb_box = netout.shape[:3]
+
     boxes = []
-
-    # interpret the output by the network
-    for row in range(GRID_H):
-        for col in range(GRID_W):
-            for b in range(BOX):
-                box = BoundBox(CLASS)
-
-                # first 5 weights for x, y, w, h and confidence
-                box.x, box.y, box.w, box.h, box.c = netout[row,col,b,:5]
-
-                box.x = (col + sigmoid(box.x)) / GRID_W
-                box.y = (row + sigmoid(box.y)) / GRID_H
-                box.w = ANCHORS[2 * b + 0] * np.exp(box.w) / GRID_W
-                box.h = ANCHORS[2 * b + 1] * np.exp(box.h) / GRID_H
-                box.c = sigmoid(box.c)
-
-                # last 20 weights for class likelihoods
+    
+    # decode the output by the network
+    netout[..., 4]  = sigmoid(netout[..., 4])
+    netout[..., 5:] = netout[..., 4][..., np.newaxis] * softmax(netout[..., 5:])
+    netout[..., 5:] *= netout[..., 5:] > threshold
+    
+    for row in range(grid_h):
+        for col in range(grid_w):
+            for b in range(nb_box):
+                # from 4th element onwards are confidence and class classes
                 classes = netout[row,col,b,5:]
-                box.probs = softmax(classes) * box.c
-                box.probs *= box.probs > THRESHOLD
+                
+                if np.sum(classes) > 0:
+                    # first 4 elements are x, y, w, and h
+                    x, y, w, h = netout[row,col,b,:4]
 
-                boxes.append(box)
+                    x = (col + sigmoid(x)) / grid_w # center position, unit: image width
+                    y = (row + sigmoid(y)) / grid_h # center position, unit: image height
+                    w = anchors[2 * b + 0] * np.exp(w) / grid_w # unit: image width
+                    h = anchors[2 * b + 1] * np.exp(h) / grid_h # unit: image height
+                    confidence = netout[row,col,b,4]
+                    
+                    box = BoundBox(x, y, w, h, confidence, classes)
+                    
+                    boxes.append(box)
 
     # suppress non-maximal boxes
-    for c in range(CLASS):
-        sorted_indices = list(reversed(np.argsort([box.probs[c] for box in boxes])))
+    for c in range(nb_class):
+        sorted_indices = list(reversed(np.argsort([box.classes[c] for box in boxes])))
 
         for i in xrange(len(sorted_indices)):
             index_i = sorted_indices[i]
             
-            if boxes[index_i].probs[c] == 0: 
+            if boxes[index_i].classes[c] == 0: 
                 continue
             else:
                 for j in xrange(i+1, len(sorted_indices)):
                     index_j = sorted_indices[j]
                     
-                    if boxes[index_i].iou(boxes[index_j]) >= 0.4:
-                        boxes[index_j].probs[c] = 0
-
-    # draw the boxes using a threshold
-    for box in boxes:
-        max_indx = np.argmax(box.probs)
-        max_prob = box.probs[max_indx]
-        
-        if max_prob > THRESHOLD:
-            xmin  = int((box.x - box.w/2) * image.shape[1])
-            xmax  = int((box.x + box.w/2) * image.shape[1])
-            ymin  = int((box.y - box.h/2) * image.shape[0])
-            ymax  = int((box.y + box.h/2) * image.shape[0])
-
-
-            cv2.rectangle(image, (xmin,ymin), (xmax,ymax), COLORS[max_indx], 2)
-            cv2.putText(image, LABELS[max_indx], (xmin, ymin - 12), 0, 1e-3 * image.shape[0], (0,255,0), 2)
-            
-    return image
-
-def parse_annotation(ann_dir):
-    all_img = []
-    
-    for ann in os.listdir(ann_dir):
-        img = {'object':[]}
-        
-        tree = ET.parse(ann_dir + ann)
-        
-        for elem in tree.iter():
-            if 'filename' in elem.tag:
-                all_img += [img]
-                img['filename'] = elem.text
-            if 'width' in elem.tag:
-                img['width'] = int(elem.text)
-            if 'height' in elem.tag:
-                img['height'] = int(elem.text)
-            if 'object' in elem.tag or 'part' in elem.tag:
-                obj = {}
-                
-                for attr in list(elem):
-                    if 'name' in attr.tag:
-                        obj['name'] = attr.text
+                    if bbox_iou(boxes[index_i], boxes[index_j]) >= 0.2:
+                        boxes[index_j].classes[c] = 0
                         
-                        if obj['name'] in LABELS:
-                            img['object'] += [obj]
-                        else:
-                            break
-                            
-                    if 'bndbox' in attr.tag:
-                        for dim in list(attr):
-                            if 'xmin' in dim.tag:
-                                obj['xmin'] = int(round(float(dim.text)))
-                            if 'ymin' in dim.tag:
-                                obj['ymin'] = int(round(float(dim.text)))
-                            if 'xmax' in dim.tag:
-                                obj['xmax'] = int(round(float(dim.text)))
-                            if 'ymax' in dim.tag:
-                                obj['ymax'] = int(round(float(dim.text)))
-                        
-    return all_img
-
-def aug_img(train_instance):
-    path = train_instance['filename']
-    all_obj = copy.deepcopy(train_instance['object'][:])
-    img = cv2.imread(img_dir + path)
-    h, w, c = img.shape
-
-    # scale the image
-    scale = np.random.uniform() / 10. + 1.
-    img = cv2.resize(img, (0,0), fx = scale, fy = scale)
-
-    # translate the image
-    max_offx = (scale-1.) * w
-    max_offy = (scale-1.) * h
-    offx = int(np.random.uniform() * max_offx)
-    offy = int(np.random.uniform() * max_offy)
-    img = img[offy : (offy + h), offx : (offx + w)]
-
-    # flip the image
-    flip = np.random.binomial(1, .5)
-    if flip > 0.5: img = cv2.flip(img, 1)
-
-    # re-color
-    t  = [np.random.uniform()]
-    t += [np.random.uniform()]
-    t += [np.random.uniform()]
-    t = np.array(t)
-
-    img = img * (1 + t)
-    img = img / (255. * 2.)
-
-    # resize the image to standard size
-    img = cv2.resize(img, (NORM_H, NORM_W))
-    img = img[:,:,::-1]
+    # remove the boxes which are less likely than a threshold
+    boxes = [box for box in boxes if box.get_score() > threshold]
     
-    # fix object's position and size
-    for obj in all_obj:
-        for attr in ['xmin', 'xmax']:
-            obj[attr] = int(obj[attr] * scale - offx)
-            obj[attr] = int(obj[attr] * float(NORM_W) / w)
-            obj[attr] = max(min(obj[attr], NORM_W), 0)
-            
-        for attr in ['ymin', 'ymax']:
-            obj[attr] = int(obj[attr] * scale - offy)
-            obj[attr] = int(obj[attr] * float(NORM_H) / h)
-            obj[attr] = max(min(obj[attr], NORM_H), 0)
-            
-        if flip > 0.5:
-            xmin = obj['xmin']
-            obj['xmin'] = NORM_W - obj['xmax']
-            obj['xmax'] = NORM_W - xmin
-    
-    return img, all_obj
-
-def data_gen(all_img, batch_size):
-    num_img = len(all_img)
-    shuffled_indices = np.random.permutation(np.arange(num_img))
-    l_bound = 0
-    r_bound = batch_size if batch_size < num_img else num_img
-    
-    while True:
-        if l_bound == r_bound:
-            l_bound  = 0
-            r_bound = batch_size if batch_size < num_img else num_img
-            shuffled_indices = np.random.permutation(np.arange(num_img))
-        
-        batch_size = r_bound - l_bound
-        currt_inst = 0
-        x_batch = np.zeros((batch_size, NORM_W, NORM_H, 3))
-        y_batch = np.zeros((batch_size, GRID_W, GRID_H, BOX, 5+CLASS))
-        
-        for index in shuffled_indices[l_bound:r_bound]:
-            train_instance = all_img[index]
-            
-            # augment input image and fix object's position and size
-            img, all_obj = aug_img(train_instance)
-            #for obj in all_obj:
-            #    cv2.rectangle(img[:,:,::-1], (obj['xmin'],obj['ymin']), (obj['xmax'],obj['ymax']), (1,1,0), 3)
-            #plt.imshow(img); plt.show()
-            
-            # construct output from object's position and size
-            for obj in all_obj:    
-                box = []
-                center_x = .5*(obj['xmin'] + obj['xmax']) #xmin, xmax
-                center_x = center_x / (float(NORM_W) / GRID_W)
-                center_y = .5*(obj['ymin'] + obj['ymax']) #ymin, ymax
-                center_y = center_y / (float(NORM_H) / GRID_H)
-                
-                grid_x = int(np.floor(center_x))
-                grid_y = int(np.floor(center_y))
-                
-                if grid_x < GRID_W and grid_y < GRID_H:
-                    obj_indx = LABELS.index(obj['name'])
-                    box = [obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax']]
-                    
-                    y_batch[currt_inst, grid_y, grid_x, :, 0:4]        = BOX * [box]
-                    y_batch[currt_inst, grid_y, grid_x, :, 4  ]        = BOX * [1.]
-                    y_batch[currt_inst, grid_y, grid_x, :, 5: ]        = BOX * [[0.]*CLASS]
-                    y_batch[currt_inst, grid_y, grid_x, :, 5+obj_indx] = 1.0
-                
-            # concatenate batch input from the image
-            x_batch[currt_inst] = img
-            currt_inst += 1
-            
-            del img, all_obj
-        
-        yield x_batch, y_batch
-        
-        l_bound  = r_bound
-        r_bound = r_bound + batch_size
-        if r_bound > num_img: r_bound = num_img
+    return boxes
 
 def sigmoid(x):
-    return 1. / (1.  + np.exp(-x))
+    return 1. / (1. + np.exp(-x))
 
-def softmax(x):
-    return np.exp(x) / np.sum(np.exp(x), axis=0)
+def softmax(x, axis=-1, t=-100.):
+    x = x - np.max(x)
+    
+    if np.min(x) < t:
+        x = x/np.min(x)*t
+        
+    e_x = np.exp(x)
+    
+    return e_x / e_x.sum(axis, keepdims=True)
