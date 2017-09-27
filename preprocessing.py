@@ -7,7 +7,7 @@ from imgaug import augmenters as iaa
 import xml.etree.ElementTree as ET
 from utils import BoundBox, normalize, bbox_iou
 
-def parse_annotation(ann_dir, labels):
+def parse_annotation(ann_dir, labels=[]):
     all_imgs = []
     
     for ann in sorted(os.listdir(ann_dir)):
@@ -30,7 +30,7 @@ def parse_annotation(ann_dir, labels):
                     if 'name' in attr.tag:
                         obj['name'] = attr.text
                         
-                        if obj['name'] in labels:
+                        if len(labels) > 0 and obj['name'] in labels:
                             img['object'] += [obj]
                         else:
                             break
@@ -131,8 +131,8 @@ class BatchGenerator:
         batch_count = 0
         
         x_batch = np.zeros((self.config['BATCH_SIZE'], self.config['IMAGE_H'], self.config['IMAGE_W'], 3))                         # input images
-        b_batch = np.zeros((self.config['BATCH_SIZE'], 1     , 1     , 1  , self.config['TRUE_BOX_BUFFER'], 4))   # list of self.config['TRUE_self.config['BOX']_BUFFER'] GT boxes
-        y_batch = np.zeros((self.config['BATCH_SIZE'], self.config['GRID_H'], self.config['GRID_W'], self.config['BOX'], 4+1+1))                # desired network output
+        b_batch = np.zeros((self.config['BATCH_SIZE'], 1     , 1     , 1    ,  self.config['TRUE_BOX_BUFFER'], 4))   # list of self.config['TRUE_self.config['BOX']_BUFFER'] GT boxes
+        y_batch = np.zeros((self.config['BATCH_SIZE'], self.config['GRID_H'],  self.config['GRID_W'], self.config['BOX'], 4+1+1))                # desired network output
         
         while True:
             if total_count < num_img:
@@ -162,7 +162,7 @@ class BatchGenerator:
                             
                             box = [center_x, center_y, center_w, center_h]
 
-                            # find the anchor that best predict this box
+                            # find the anchor that best predicts this box
                             best_anchor = -1
                             max_iou     = -1
                             
