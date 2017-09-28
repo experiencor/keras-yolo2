@@ -30,10 +30,10 @@ def parse_annotation(ann_dir, labels=[]):
                     if 'name' in attr.tag:
                         obj['name'] = attr.text
                         
-                        if len(labels) > 0 and obj['name'] in labels:
-                            img['object'] += [obj]
-                        else:
+                        if len(labels) > 0 and obj['name'] not in labels:
                             break
+                        else:
+                            img['object'] += [obj]
                             
                     if 'bndbox' in attr.tag:
                         for dim in list(attr):
@@ -145,7 +145,7 @@ class BatchGenerator:
                 true_box_index = 0
                 
                 for obj in all_objs:
-                    if obj['xmax'] > obj['xmin'] and obj['ymax'] > obj['ymin']:
+                    if obj['xmax'] > obj['xmin'] and obj['ymax'] > obj['ymin'] and obj['name'] in self.config['LABELS']:
                         center_x = .5*(obj['xmin'] + obj['xmax'])
                         center_x = center_x / (float(self.config['IMAGE_W']) / self.config['GRID_W'])
                         center_y = .5*(obj['ymin'] + obj['ymax'])
@@ -192,12 +192,11 @@ class BatchGenerator:
                                 
                 # assign input image to x_batch
                 if self.norm: 
-                    img = normalize(img)
-                    x_batch[batch_count] = img
+                    x_batch[batch_count] = normalize(img)
                 else:
                     x_batch[batch_count] = img
 
-                    # plot image and bounding boxes for verification
+                    # plot image and bounding boxes for sanity check
                     for obj in all_objs:
                         if obj['xmax'] > obj['xmin'] and obj['ymax'] > obj['ymin']:
                             cv2.rectangle(img[:,:,::-1], (obj['xmin'],obj['ymin']), (obj['xmax'],obj['ymax']), (255,0,0), 3)
@@ -219,7 +218,7 @@ class BatchGenerator:
                 yield [x_batch, b_batch], y_batch
                 
                 x_batch = np.zeros((self.config['BATCH_SIZE'], self.config['IMAGE_H'], self.config['IMAGE_W'], 3))
-                y_batch = np.zeros((self.config['BATCH_SIZE'], self.config['GRID_H'], self.config['GRID_W'], self.config['BOX'], 5+self.config['CLASS']))       
+                y_batch = np.zeros((self.config['BATCH_SIZE'], self.config['GRID_H'],  self.config['GRID_W'],  self.config['BOX'], 5+self.config['CLASS']))       
                 
                 batch_count = 0
 
@@ -240,6 +239,7 @@ class BatchGenerator:
             max_offy = (scale-1.) * h
             offx = int(np.random.uniform() * max_offx)
             offy = int(np.random.uniform() * max_offy)
+            
             image = image[offy : (offy + h), offx : (offx + w)]
 
             ### flip the image

@@ -99,7 +99,7 @@ def draw_boxes(image, boxes, labels):
         
     return image       
         
-def decode_netout(netout, threshold, anchors, nb_class):
+def decode_netout(netout, obj_threshold, nms_threshold, anchors, nb_class):
     grid_h, grid_w, nb_box = netout.shape[:3]
 
     boxes = []
@@ -107,7 +107,7 @@ def decode_netout(netout, threshold, anchors, nb_class):
     # decode the output by the network
     netout[..., 4]  = sigmoid(netout[..., 4])
     netout[..., 5:] = netout[..., 4][..., np.newaxis] * softmax(netout[..., 5:])
-    netout[..., 5:] *= netout[..., 5:] > threshold
+    netout[..., 5:] *= netout[..., 5:] > obj_threshold
     
     for row in range(grid_h):
         for col in range(grid_w):
@@ -142,11 +142,11 @@ def decode_netout(netout, threshold, anchors, nb_class):
                 for j in xrange(i+1, len(sorted_indices)):
                     index_j = sorted_indices[j]
                     
-                    if bbox_iou(boxes[index_i], boxes[index_j]) >= 0.2:
+                    if bbox_iou(boxes[index_i], boxes[index_j]) >= nms_threshold:
                         boxes[index_j].classes[c] = 0
                         
-    # remove the boxes which are less likely than a threshold
-    boxes = [box for box in boxes if box.get_score() > threshold]
+    # remove the boxes which are less likely than a obj_threshold
+    boxes = [box for box in boxes if box.get_score() > obj_threshold]
     
     return boxes
 
