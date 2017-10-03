@@ -16,11 +16,10 @@ Evaluation of the current implementation:
 # Usage for bare python people
 ## Data preparation
 Download COCO detection data from http://cocodataset.org/#download
-    
     + http://images.cocodataset.org/zips/train2014.zip => training images
 
     + http://images.cocodataset.org/zips/val2014.zip => validation images
-    
+
     + http://images.cocodataset.org/annotations/annotations_trainval2014.zip => training and validation annotations
     
 Run this script to convert COCO annotation format to VOC format
