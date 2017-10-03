@@ -7,18 +7,20 @@ Evaluation of the current implementation:
 | COCO train   | COCO val      | 28.6 |    42.1 |
 
 # Some example applications:
-## Biological cell Detection
+## Self-driving Car
+<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center">![Foo](https://j.gifs.com/oY3zDB.gif)</p></a>
 
 ## Raccon detection
+<a href="https://www.youtube.com/watch?v=aibuvj2-zxA" rel="some text"><p align="center">![Foo](https://j.gifs.com/1r1nVZ.gif)</p></a>
 
 # Usage for bare python people
 ## Data preparation
-+ Download COCO detection data from http://cocodataset.org/#download
-    http://images.cocodataset.org/zips/train2014.zip => training images
-    http://images.cocodataset.org/zips/val2014.zip => validation images
-    http://images.cocodataset.org/annotations/annotations_trainval2014.zip => training and validation annotations
+Download COCO detection data from http://cocodataset.org/#download
+    + http://images.cocodataset.org/zips/train2014.zip => training images
+    + http://images.cocodataset.org/zips/val2014.zip => validation images
+    + http://images.cocodataset.org/annotations/annotations_trainval2014.zip => training and validation annotations
     
-+ Run this script to convert COCO annotation format to VOC format
+Run this script to convert COCO annotation format to VOC format
     https://gist.github.com/chicham/6ed3842d0d2014987186#file-coco2pascal-py
 
 At the end of this process, we should have handles to the 4 folders:
@@ -60,9 +62,10 @@ The configuration file is a json file, which looks like this:
 }
 ```
 
-The model section defines the type of the model to construct as well as other parameters of the model such as the input image size and the list of anchors.
+The model section defines the type of the model to construct as well as other parameters of the model such as the input image size and the list of anchors. Two achitectures are supported at the moment: tiny yolo and full yolo. 
 
-Two achitectures are supported at the moment: tiny yolo and full yolo. The pretrained weights of tiny yolo and full can be downloaded at 
+Download pretrained weights of tiny yolo: https://1drv.ms/u/s!ApLdDEW3ut5fa5Z9jibkqUGG-CA
+Download pretrained weights of full yolo: https://1drv.ms/u/s!ApLdDEW3ut5fbAMIhQAO1A26n2A
 
 ## Start the training process
 
@@ -73,8 +76,8 @@ By the end of this process, the code will produce the best model. Training stops
 ## Perform detection using trained weights on an image by running
 `python predict.py -c config.json -w /path/to/best_weights.h5 -i /path/to/image`
 
-It carries out detection on a image and write the image with bounding boxes to the same folder.
+It carries out detection on a image and write the image with detected bounding boxes to the same folder.
 
 # Usage for jupyter notebook people
 
-+ Refer to the notebook for a complete step-through implementation of YOLOv2 from scratch (training, testing, and scoring).
+Refer to the notebook (https://github.com/experiencor/basic-yolo-keras/blob/master/Yolo%20Step-by-Step.ipynb) for a complete step-through implementation of YOLOv2 from scratch (training, testing, and scoring).
