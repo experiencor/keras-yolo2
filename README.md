@@ -28,10 +28,14 @@ Run this script to convert COCO annotation format to VOC format
     https://gist.github.com/chicham/6ed3842d0d2014987186#file-coco2pascal-py
 
 At the end of this process, we should have handles to the 4 folders:
-    train_image_folder <= the folder that contains the train images.
-    train_annot_folder <= the folder that contains the train annotations in VOC format.
-    valid_image_folder <= the folder that contains the validation images.
-    valid_annot_folder <= the folder that contains the validation annotations in VOC format.
+
++ train_image_folder <= the folder that contains the train images.
+
++ train_annot_folder <= the folder that contains the train annotations in VOC format.
+
++ valid_image_folder <= the folder that contains the validation images.
+
++ valid_annot_folder <= the folder that contains the validation annotations in VOC format.
     
 There is a one-to-one correspondence by file name between images and annotations. For custom dataset, it should be organized in this manner too. Otherwise, the training set will be automatically splitted into training set and validation set using the ratio of 0.9.
 
