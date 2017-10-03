@@ -7,8 +7,9 @@ from imgaug import augmenters as iaa
 import xml.etree.ElementTree as ET
 from utils import BoundBox, normalize, bbox_iou
 
-def parse_annotation(ann_dir, labels=[]):
+def parse_annotation(ann_dir, img_dir, labels=[]):
     all_imgs = []
+    seen_labels = set()
     
     for ann in sorted(os.listdir(ann_dir)):
         img = {'object':[]}
@@ -18,7 +19,7 @@ def parse_annotation(ann_dir, labels=[]):
         for elem in tree.iter():
             if 'filename' in elem.tag:
                 all_imgs += [img]
-                img['filename'] = ann_dir[:-4] + '/' + elem.text
+                img['filename'] = img_dir + elem.text
             if 'width' in elem.tag:
                 img['width'] = int(elem.text)
             if 'height' in elem.tag:
@@ -29,6 +30,7 @@ def parse_annotation(ann_dir, labels=[]):
                 for attr in list(elem):
                     if 'name' in attr.tag:
                         obj['name'] = attr.text
+                        seen_labels.add(obj['name'])
                         
                         if len(labels) > 0 and obj['name'] not in labels:
                             break
@@ -46,7 +48,7 @@ def parse_annotation(ann_dir, labels=[]):
                             if 'ymax' in dim.tag:
                                 obj['ymax'] = int(round(float(dim.text)))
                         
-    return all_imgs
+    return all_imgs, seen_labels
 
 class BatchGenerator:
     def __init__(self, images, 
@@ -194,8 +196,6 @@ class BatchGenerator:
                 if self.norm: 
                     x_batch[batch_count] = normalize(img)
                 else:
-                    x_batch[batch_count] = img
-
                     # plot image and bounding boxes for sanity check
                     for obj in all_objs:
                         if obj['xmax'] > obj['xmin'] and obj['ymax'] > obj['ymin']:
@@ -204,7 +204,8 @@ class BatchGenerator:
                                         (obj['xmin']+2, obj['ymin']+12), 
                                         0, 1.2e-3 * img.shape[0], 
                                         (0,255,0), 2)
-                    plt.figure(figsize=(10,10)); plt.imshow(img); plt.show()
+                            
+                    x_batch[batch_count] = img
 
                 # increase instance counter in current batch
                 batch_count += 1  
