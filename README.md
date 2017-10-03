@@ -7,20 +7,22 @@ Evaluation of the current implementation:
 | COCO train   | COCO val      | 28.6 |    42.1 |
 
 # Some example applications:
-## Self-driving Car
-<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center">![Foo](https://j.gifs.com/oY3zDB.gif)</p></a>
 
 ## Raccon detection
 <a href="https://www.youtube.com/watch?v=aibuvj2-zxA" rel="some text"><p align="center">![Foo](https://j.gifs.com/1r1nVZ.gif)</p></a>
 
+## Self-driving Car
+<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center">![Foo](https://j.gifs.com/oY3zDB.gif)</p></a>
+
 # Usage for bare python people
 ## Data preparation
 Download COCO detection data from http://cocodataset.org/#download
-    + http://images.cocodataset.org/zips/train2014.zip => training images
 
-    + http://images.cocodataset.org/zips/val2014.zip => validation images
++ http://images.cocodataset.org/zips/train2014.zip => training images
 
-    + http://images.cocodataset.org/annotations/annotations_trainval2014.zip => training and validation annotations
++ http://images.cocodataset.org/zips/val2014.zip => validation images
+
++ http://images.cocodataset.org/annotations/annotations_trainval2014.zip => training and validation annotations
     
 Run this script to convert COCO annotation format to VOC format
     https://gist.github.com/chicham/6ed3842d0d2014987186#file-coco2pascal-py
@@ -67,6 +69,7 @@ The configuration file is a json file, which looks like this:
 The model section defines the type of the model to construct as well as other parameters of the model such as the input image size and the list of anchors. Two achitectures are supported at the moment: tiny yolo and full yolo. 
 
 Download pretrained weights of tiny yolo: https://1drv.ms/u/s!ApLdDEW3ut5fa5Z9jibkqUGG-CA
+
 Download pretrained weights of full yolo: https://1drv.ms/u/s!ApLdDEW3ut5fbAMIhQAO1A26n2A
 
 ## Start the training process
