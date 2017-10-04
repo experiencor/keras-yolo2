@@ -275,4 +275,4 @@ class BatchGenerator:
         return image, all_objs
 
     def get_dateset_size(self):
-        return len(self.images)/self.config['BATCH_SIZE']
+        return int(np.ceil(float(len(self.images))/self.config['BATCH_SIZE']))

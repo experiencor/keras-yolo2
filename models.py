@@ -88,7 +88,7 @@ class YOLO(object):
             x = LeakyReLU(alpha=0.1)(x)
 
             # Layer 8
-            x = Conv2D(256, (3,3), strides=(1,1), padding='same', name='conv_8', use_bias=False, input_shape=(416,416,3))(x)
+            x = Conv2D(256, (3,3), strides=(1,1), padding='same', name='conv_8', use_bias=False)(x)
             x = BatchNormalization(name='norm_8')(x)
             x = LeakyReLU(alpha=0.1)(x)
             x = MaxPooling2D(pool_size=(2, 2))(x)
@@ -171,7 +171,7 @@ class YOLO(object):
             x = LeakyReLU(alpha=0.1)(x)
 
             # Layer 23
-            x = Conv2D(self.nb_box * (4 + 1 + self.nb_class), (1,1), strides=(1,1), padding='same', name='conv_23', kernel_initializer='he_normal')(x)
+            x = Conv2D(self.nb_box * (4 + 1 + self.nb_class), (1,1), strides=(1,1), padding='same', name='conv_23', kernel_initializer='lecun_normal')(x)
             output = Reshape((self.grid_h, self.grid_w, self.nb_box, 4 + 1 + self.nb_class))(x)
 
             # a small hack to allow true_boxes to be registered when Keras build the model 
@@ -214,7 +214,7 @@ class YOLO(object):
                 x = LeakyReLU(alpha=0.1)(x)
 
             # Layer 9
-            x = Conv2D(self.nb_box * (4 + 1 + self.nb_class), (1,1), strides=(1,1), padding='same', name='conv_9', kernel_initializer='he_normal')(x)
+            x = Conv2D(self.nb_box * (4 + 1 + self.nb_class), (1,1), strides=(1,1), padding='same', name='conv_9', kernel_initializer='lecun_normal')(x)
             output = Reshape((self.grid_h, self.grid_w, self.nb_box, 4 + 1 + self.nb_class))(x)
 
             output = Lambda(lambda args: args[0])([output, self.true_boxes])
@@ -368,9 +368,10 @@ class YOLO(object):
         nb_true_box = tf.reduce_sum(y_true[..., 4])
         nb_pred_box = tf.reduce_sum(tf.to_float(true_box_conf > 0.5) * tf.to_float(pred_box_conf > 0.3))
         
-        total_ap = tf.assign_add(total_ap, nb_pred_box/nb_true_box) 
+        current_ap = nb_pred_box/nb_true_box
+        total_ap = tf.assign_add(total_ap, current_ap) 
         
-        #loss = tf.Print(loss, [loss_xy, loss_wh, loss_conf, loss_class, loss, total_ap/seen], message='DEBUG', summarize=1000)
+        loss = tf.Print(loss, [loss_xy, loss_wh, loss_conf, loss_class, loss, current_ap, total_ap/seen], message='DEBUG', summarize=1000)
         
         return loss
 
@@ -493,9 +494,28 @@ class YOLO(object):
         
         return e_x / e_x.sum(axis, keepdims=True)
 
-    def train(self, train_imgs, valid_imgs, nb_epoch, learning_rate, batch_size, warmup_bs):
+    def train(self, train_imgs,     # the list of images to train the model
+                    valid_imgs,     # the list of images used to validate the model
+                    train_times,    # the number of time to repeat the training set, often used for small datasets
+                    valid_times,    # the number of times to repeat the validation set, often used for small datasets
+                    nb_epoch,       # number of epoches
+                    learning_rate,  # the learning rate
+                    batch_size,     # the size of the batch
+                    warmup_bs):     # number of initial batches to let the model familiarize with the new dataset
+
         self.batch_size = batch_size
-        self.warmup_bs  = warmup_bs
+        self.warmup_bs  = warmup_bs        
+
+        ############################################
+        # Compile the model
+        ############################################
+
+        optimizer = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+        self.model.compile(loss=self.custom_loss, optimizer=optimizer)
+
+        ############################################
+        # Make train and validation generators
+        ############################################
 
         generator_config = {
             'IMAGE_H'         : self.input_size, 
@@ -508,18 +528,7 @@ class YOLO(object):
             'ANCHORS'         : self.anchors,
             'BATCH_SIZE'      : self.batch_size,
             'TRUE_BOX_BUFFER' : self.max_box_per_image,
-        }            
-
-        ############################################
-        # Compile the model
-        ############################################
-
-        optimizer = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-        self.model.compile(loss=self.custom_loss, optimizer=optimizer)
-
-        ############################################
-        # Make train and validation generators
-        ############################################
+        }    
 
         train_batch = BatchGenerator(train_imgs, generator_config)
         valid_batch = BatchGenerator(valid_imgs, generator_config, jitter=False)
@@ -539,7 +548,7 @@ class YOLO(object):
                                      save_best_only=True, 
                                      mode='min', 
                                      period=1)
-        tensorboard = TensorBoard(log_dir='~/logs/coco', 
+        tensorboard = TensorBoard(log_dir='~/logs/yolo', 
                                   histogram_freq=0, 
                                   write_graph=True, 
                                   write_images=False)
@@ -549,10 +558,10 @@ class YOLO(object):
         ############################################        
 
         self.model.fit_generator(generator        = train_batch.get_generator(), 
-                                 steps_per_epoch  = train_batch.get_dateset_size(), 
+                                 steps_per_epoch  = train_batch.get_dateset_size() * train_times, 
                                  epochs           = nb_epoch, 
                                  verbose          = 1,
                                  validation_data  = valid_batch.get_generator(),
-                                 validation_steps = valid_batch.get_dateset_size(),
+                                 validation_steps = valid_batch.get_dateset_size() * valid_times,
                                  callbacks        = [early_stop, checkpoint, tensorboard], 
                                  max_queue_size   = 3)

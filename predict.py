@@ -67,7 +67,8 @@ def _main_(args):
     #   Make the model 
     ###############################
 
-    yolo = YOLO(input_size=config['model']['input_size'], 
+    yolo = YOLO(architecture=config['model']['architecture'],
+                input_size=config['model']['input_size'], 
                 labels=config['model']['labels'], 
                 max_box_per_image=config['model']['max_box_per_image'],
                 anchors=config['model']['anchors'])

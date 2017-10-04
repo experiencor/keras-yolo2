@@ -30,9 +30,6 @@ The configuration file is a json file and looks like this:
     }
 }
 
-The first 5 parameters are compulsory. Their names are self-explanatory.
-
-The rest of the parameters can be left to the defaults.
 """
 
 import argparse
@@ -75,10 +72,10 @@ def _main_(args):
                                                     config['valid']['valid_image_folder'], 
                                                     config['model']['labels'])
     else:
-        train_valid_split = int(0.9*len(train_imgs))
+        train_valid_split = int(0.8*len(train_imgs))
 
-        valid_imgs = train_imgs[:train_valid_split]
-        train_imgs = train_imgs[train_valid_split:]
+        valid_imgs = train_imgs[train_valid_split:]
+        train_imgs = train_imgs[:train_valid_split]
 
     ###############################
     #   Construct the model 
@@ -101,8 +98,12 @@ def _main_(args):
     #   Start the training process 
     ###############################
 
-    yolo.train(train_imgs, 
-               valid_imgs, 
+    print len(train_imgs), len(valid_imgs)
+
+    yolo.train(train_imgs,
+               valid_imgs,
+               config['train']['train_times'],
+               config['valid']['valid_times'],
                config['train']['nb_epoch'], 
                config['train']['learning_rate'], 
                config['train']['batch_size'],
