@@ -6,27 +6,35 @@ The configuration file is a json file and looks like this:
 
 {
     "model" : {
-        "architecture": "Full Yolo",
-        "input_size": 416,
-        "anchors": [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828],
-        "max_box_per_image": 20,        
-        "labels": ["person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
+        "architecture":         "Tiny Yolo",
+        "input_size":           416,
+        "anchors":              [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828],
+        "max_box_per_image":    10,        
+        "labels":               ["raccoon"]
     },
 
     "train": {
-        "train_image_folder": "/home/andy/data/raccoon_dataset/images/",
-        "train_annot_folder": "/home/andy/data/raccoon_dataset/anns/",      
+        "train_image_folder":   "/home/andy/data/raccoon_dataset/images/",
+        "train_annot_folder":   "/home/andy/data/raccoon_dataset/anns/",      
           
-        "pretrained_weights": "",
-        "batch_size": 2,
-        "learning_rate": 1e-4,
-        "nb_epoch": 30,
-        "warmup_batches": 10000
+        "train_times":          10,
+        "pretrained_weights":   "",
+        "batch_size":           16,
+        "learning_rate":        1e-4,
+        "nb_epoch":             50,
+        "warmup_batches":       100,
+
+        "object_scale":         5.0 ,
+        "no_object_scale":      1.0,
+        "coord_scale":          1.0,
+        "class_scale":          1.0
     },
 
     "valid": {
-        "valid_image_folder": "",
-        "valid_annot_folder": ""
+        "valid_image_folder":   "",
+        "valid_annot_folder":   "",
+
+        "valid_times":          1
     }
 }
 
@@ -81,11 +89,11 @@ def _main_(args):
     #   Construct the model 
     ###############################
 
-    yolo = YOLO(architecture=config['model']['architecture'],
-                input_size=config['model']['input_size'], 
-                labels=config['model']['labels'], 
-                max_box_per_image=config['model']['max_box_per_image'],
-                anchors=config['model']['anchors'])
+    yolo = YOLO(architecture        = config['model']['architecture'],
+                input_size          = config['model']['input_size'], 
+                labels              = config['model']['labels'], 
+                max_box_per_image   = config['model']['max_box_per_image'],
+                anchors             = config['model']['anchors'])
 
     ###############################
     #   Load the pretrained weights (if any) 
@@ -98,16 +106,18 @@ def _main_(args):
     #   Start the training process 
     ###############################
 
-    print len(train_imgs), len(valid_imgs)
-
-    yolo.train(train_imgs,
-               valid_imgs,
-               config['train']['train_times'],
-               config['valid']['valid_times'],
-               config['train']['nb_epoch'], 
-               config['train']['learning_rate'], 
-               config['train']['batch_size'],
-               config['train']['warmup_batches'])
+    yolo.train(train_imgs       = train_imgs,
+               valid_imgs       = valid_imgs,
+               train_times      = config['train']['train_times'],
+               valid_times      = config['valid']['valid_times'],
+               nb_epoch         = config['train']['nb_epoch'], 
+               learning_rate    = config['train']['learning_rate'], 
+               batch_size       = config['train']['batch_size'],
+               warmup_bs        = config['train']['warmup_batches'],
+               object_scale     = config['train']['object_scale'],
+               no_object_scale  = config['train']['no_object_scale'],
+               coord_scale      = config['train']['coord_scale'],
+               class_scale      = config['train']['class_scale'])
 
 if __name__ == '__main__':
     args = argparser.parse_args()

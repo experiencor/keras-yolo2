@@ -90,14 +90,15 @@ def draw_boxes(image, boxes, labels):
         ymin  = int((box.y - box.h/2) * image.shape[0])
         ymax  = int((box.y + box.h/2) * image.shape[0])
 
-        cv2.rectangle(image, (xmin,ymin), (xmax,ymax), (255,0,0), 2)
-        cv2.putText(image, labels[box.get_label()] + ' ' + str(box.get_score()), 
-                    (xmin, ymin + 16), 
-                    0, 
+        cv2.rectangle(image, (xmin,ymin), (xmax,ymax), (0,255,0), 3)
+        cv2.putText(image, 
+                    labels[box.get_label()] + ' ' + str(box.get_score()), 
+                    (xmin, ymin - 13), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 
                     1e-3 * image.shape[0], 
-                    (255,0,0), 2)
+                    (0,255,0), 2)
         
-    return image       
+    return image        
         
 def decode_netout(netout, obj_threshold, nms_threshold, anchors, nb_class):
     grid_h, grid_w, nb_box = netout.shape[:3]

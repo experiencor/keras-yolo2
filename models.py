@@ -24,16 +24,11 @@ class YOLO(object):
         self.grid_h = input_size/32
         self.grid_w = input_size/32
         
-        self.anchors  = anchors
         self.labels   = list(labels)
         self.nb_class = len(self.labels)
         self.nb_box   = 5
         self.class_wt = np.ones(self.nb_class, dtype='float32')
-
-        self.no_object_scale = 5.
-        self.object_scale    = 1.
-        self.coord_scale     = 1.
-        self.class_scale     = 1.
+        self.anchors  = anchors
 
         self.max_box_per_image = max_box_per_image
 
@@ -226,6 +221,14 @@ class YOLO(object):
                   
         else:
             raise Exception('Architecture not supported! Only support Full Yolo and Tiny Yolo at the moment!')
+
+        layer = self.model.layers[-4] # the last convolutional layer
+        weights = layer.get_weights()
+
+        new_kernel = np.random.normal(size=weights[0].shape)/(self.grid_h*self.grid_w)
+        new_bias   = np.random.normal(size=weights[1].shape)/(self.grid_h*self.grid_w)
+
+        layer.set_weights([new_kernel, new_bias])
 
         self.model.summary()
 
@@ -501,10 +504,19 @@ class YOLO(object):
                     nb_epoch,       # number of epoches
                     learning_rate,  # the learning rate
                     batch_size,     # the size of the batch
-                    warmup_bs):     # number of initial batches to let the model familiarize with the new dataset
+                    warmup_bs,      # number of initial batches to let the model familiarize with the new dataset
+                    object_scale,
+                    no_object_scale,
+                    coord_scale,
+                    class_scale):     
 
         self.batch_size = batch_size
-        self.warmup_bs  = warmup_bs        
+        self.warmup_bs  = warmup_bs 
+
+        self.object_scale    = object_scale
+        self.no_object_scale = no_object_scale
+        self.coord_scale     = coord_scale
+        self.class_scale     = class_scale
 
         ############################################
         # Compile the model
@@ -548,7 +560,7 @@ class YOLO(object):
                                      save_best_only=True, 
                                      mode='min', 
                                      period=1)
-        tensorboard = TensorBoard(log_dir='~/logs/yolo', 
+        tensorboard = TensorBoard(log_dir='~/logs/yolo/', 
                                   histogram_freq=0, 
                                   write_graph=True, 
                                   write_images=False)
