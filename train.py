@@ -81,9 +81,15 @@ def _main_(args):
                                                     config['model']['labels'])
     else:
         train_valid_split = int(0.8*len(train_imgs))
+        np.random.shuffle(train_imgs)
 
         valid_imgs = train_imgs[train_valid_split:]
         train_imgs = train_imgs[:train_valid_split]
+
+    if len(set(config['model']['labels']).intersection(train_labels)) == 0:
+        print "Labels to be detected are not present in the dataset! Please revise the list of labels in the config.json file!"
+        
+        return
 
     ###############################
     #   Construct the model 
@@ -117,7 +123,8 @@ def _main_(args):
                object_scale     = config['train']['object_scale'],
                no_object_scale  = config['train']['no_object_scale'],
                coord_scale      = config['train']['coord_scale'],
-               class_scale      = config['train']['class_scale'])
+               class_scale      = config['train']['class_scale'],
+               debug            = config['train']['debug'])
 
 if __name__ == '__main__':
     args = argparser.parse_args()

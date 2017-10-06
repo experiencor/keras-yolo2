@@ -246,7 +246,7 @@ class YOLO(object):
         
         seen = tf.Variable(0.)
         
-        total_ap = tf.Variable(0.)
+        total_recall = tf.Variable(0.)
         
         """
         Adjust prediction
@@ -368,13 +368,14 @@ class YOLO(object):
         
         loss = loss_xy + loss_wh + loss_conf + loss_class
         
-        nb_true_box = tf.reduce_sum(y_true[..., 4])
-        nb_pred_box = tf.reduce_sum(tf.to_float(true_box_conf > 0.5) * tf.to_float(pred_box_conf > 0.3))
-        
-        current_ap = nb_pred_box/nb_true_box
-        total_ap = tf.assign_add(total_ap, current_ap) 
-        
-        loss = tf.Print(loss, [loss_xy, loss_wh, loss_conf, loss_class, loss, current_ap, total_ap/seen], message='DEBUG', summarize=1000)
+        if self.debug:
+            nb_true_box = tf.reduce_sum(y_true[..., 4])
+            nb_pred_box = tf.reduce_sum(tf.to_float(true_box_conf > 0.5) * tf.to_float(pred_box_conf > 0.3))
+            
+            current_recall = nb_pred_box/(nb_true_box + 1e-6)
+            total_recall = tf.assign_add(total_recall, current_recall) 
+
+            loss = tf.Print(loss, [loss_xy, loss_wh, loss_conf, loss_class, loss, current_recall, total_recall/seen], message='DEBUG', summarize=1000)
         
         return loss
 
@@ -508,7 +509,8 @@ class YOLO(object):
                     object_scale,
                     no_object_scale,
                     coord_scale,
-                    class_scale):     
+                    class_scale,
+                    debug):     
 
         self.batch_size = batch_size
         self.warmup_bs  = warmup_bs 
@@ -517,6 +519,8 @@ class YOLO(object):
         self.no_object_scale = no_object_scale
         self.coord_scale     = coord_scale
         self.class_scale     = class_scale
+
+        self.debug = debug
 
         ############################################
         # Compile the model

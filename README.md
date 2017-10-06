@@ -1,22 +1,32 @@
-This is an implementation of YOLOv2 in Keras with Tensorflow backend. 
 
-The two original papers are https://arxiv.org/abs/1506.02640 (YOLOv1) and https://arxiv.org/abs/1612.08242 (YOLOv2).
+# YOLOv2 in Keras and Applications
 
-# Some example applications:
+This project aims to implement all the details of YOLOv2 in Keras with Tensorflow backend. It also explores to apply YOLOv2 to some interesting applications. 
 
-## Raccon detection
-<a href="https://www.youtube.com/watch?v=aibuvj2-zxA" rel="some text"><p align="center">![Foo](https://image.ibb.co/cpqaWG/raccoon3_detected.jpg)</p></a>
+## Todo list:
+- [x] Warmup training
+- [x] Raccoon detection
+- [x] Self-driving car
+- [ ] Kangaroo detection
+- [ ] SqueezeNet backend
+- [ ] MobileNet backend
+- [ ] Multiscale training
+
+## Some example applications:
+
+### Raccon detection
+<a href="https://www.youtube.com/watch?v=aibuvj2-zxA" rel="some text"><p align="center"><img src="https://i.imgur.com/6okeDjz.jpg" height="300"></p></a>
 
 Dataset from shttps://github.com/datitran/raccoon_dataset.
 
-## Self-driving Car
-<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center">![Foo](https://image.ibb.co/mZQpQb/Screenshot_2017_10_05_21_32_36.png)</p></a>
+### Self-driving Car
+<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center"><img src="https://i.imgur.com/kEc9ptL.jpg" height="300"></p></a>
 
-Trained on VOC2007 and did detection on a random dashcam video.
+Trained on COCO dataset and did detection on a random dashcam video.
 
-# Usage for python code
-## Data preparation
-Download the Raccoon dataset from from shttps://github.com/datitran/raccoon_dataset.
+## Usage for python code
+### Data preparation
+Download the Raccoon dataset from from https://github.com/datitran/raccoon_dataset.
 
 Organize the dataset into 4 folders:
 
@@ -30,7 +40,7 @@ Organize the dataset into 4 folders:
     
 There is a one-to-one correspondence by file name between images and annotations. If the validation set is empty, the training set will be automatically splitted into the training set and validation set using the ratio of 0.8.
 
-## Edit the configuration file
+### Edit the configuration file
 The configuration file is a json file, which looks like this:
 
 ```json
@@ -75,22 +85,24 @@ Download pretrained weights of tiny yolo: https://1drv.ms/u/s!ApLdDEW3ut5fa5Z9ji
 
 Download pretrained weights of full yolo: https://1drv.ms/u/s!ApLdDEW3ut5fbAMIhQAO1A26n2A
 
-## Start the training process
+Important! Plese remember to change "labels" to the list of labels that you want to detect.
+
+### Start the training process
 
 `python train.py -c config.json`
 
 By the end of this process, the code will write the weights of the best model to file best_weights.h5. The training process stops when the loss on the validation set is not improved in 3 consecutive epoches.
 
-## Perform detection using trained weights on an image by running
+### Perform detection using trained weights on an image by running
 `python predict.py -c config.json -w /path/to/best_weights.h5 -i /path/to/image`
 
-It carries out detection on a image and write the image with detected bounding boxes to the same folder.
+It carries out detection on the image and write the image with detected bounding boxes to the same folder.
 
-# Usage jupyter notebook
+## Usage for jupyter notebook
 
-Refer to the notebook (https://github.com/experiencor/basic-yolo-keras/blob/master/Yolo%20Step-by-Step.ipynb) for a complete step-through implementation of YOLOv2 from scratch (training, testing, and scoring).
+Refer to the notebook (https://github.com/experiencor/basic-yolo-keras/blob/master/Yolo%20Step-by-Step.ipynb) for a complete walk-through implementation of YOLOv2 from scratch (training, testing, and scoring).
 
-# Evaluation of the current implementation:
+## Evaluation of the current implementation:
 
 | Train        | Test          | mAP (with this implementation) | mAP (on released weights) |
 | -------------|:--------------|:------------------------:|:-------------------------:|
