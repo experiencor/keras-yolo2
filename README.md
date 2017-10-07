@@ -7,7 +7,7 @@ This project aims to implement all the details of YOLOv2 in Keras with Tensorflo
 - [x] Warmup training
 - [x] Raccoon detection
 - [x] Self-driving car
-- [ ] Kangaroo detection
+- [x] Kangaroo detection
 - [ ] SqueezeNet backend
 - [ ] MobileNet backend
 - [ ] Multiscale training
@@ -18,6 +18,11 @@ This project aims to implement all the details of YOLOv2 in Keras with Tensorflo
 <a href="https://www.youtube.com/watch?v=aibuvj2-zxA" rel="some text"><p align="center"><img src="https://i.imgur.com/6okeDjz.jpg" height="300"></p></a>
 
 Dataset from shttps://github.com/datitran/raccoon_dataset.
+
+### Raccon detection
+<a href="https://youtu.be/vjmFzEP1qZw?t=34" rel="some text"><p align="center"><img src="https://i.imgur.com/v606VZX.jpg" height="300"></p></a>
+
+Dataset to be released.
 
 ### Self-driving Car
 <a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center"><img src="https://i.imgur.com/kEc9ptL.jpg" height="300"></p></a>
@@ -43,10 +48,10 @@ There is a one-to-one correspondence by file name between images and annotations
 ### Edit the configuration file
 The configuration file is a json file, which looks like this:
 
-```json
+```python
 {
     "model" : {
-        "architecture":         "Full Yolo",
+        "architecture":         "Full Yolo",    # should be either "Tiny Yolo" or "Full Yolo"
         "input_size":           416,
         "anchors":              [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828],
         "max_box_per_image":    10,        
@@ -57,17 +62,19 @@ The configuration file is a json file, which looks like this:
         "train_image_folder":   "/home/andy/data/raccoon_dataset/images/",
         "train_annot_folder":   "/home/andy/data/raccoon_dataset/anns/",      
           
-        "train_times":          10,
-        "pretrained_weights":   "",
-        "batch_size":           16,
-        "learning_rate":        1e-4,
-        "nb_epoch":             50,
-        "warmup_batches":       100,
+        "train_times":          10,             # the number of time to cycle through the training set, useful for small datasets
+        "pretrained_weights":   "",             # specify the path of the pretrained weights, but it's fine to start from scratch
+        "batch_size":           16,             # the number of images to read in each batch
+        "learning_rate":        1e-4,           # the base learning rate of the default Adam rate scheduler
+        "nb_epoch":             50,             # number of epoches
+        "warmup_batches":       100,            # the number of initial batches during which the sizes of the 5 boxes in each cell is forced to match the sizes of the 5 anchors, this trick seems to improve precision emperically
 
-        "object_scale":         5.0 ,
-        "no_object_scale":      1.0,
-        "coord_scale":          1.0,
-        "class_scale":          1.0
+        "object_scale":         5.0 ,           # determine how much to penalize wrong prediction of confidence of object predictors
+        "no_object_scale":      1.0,            # determine how much to penalize wrong prediction of confidence of non-object predictors
+        "coord_scale":          1.0,            # determine how much to penalize wrong position and size predictions (x, y, w, h)
+        "class_scale":          1.0,            # determine how much to penalize wrong class prediction
+
+        "debug":                true            # turn on/off the line that prints current confidence, position, size, class losses and recall
     },
 
     "valid": {
@@ -77,6 +84,7 @@ The configuration file is a json file, which looks like this:
         "valid_times":          1
     }
 }
+
 ```
 
 The model section defines the type of the model to construct as well as other parameters of the model such as the input image size and the list of anchors. Two achitectures are supported at the moment: "Tiny Yolo" and "Full Yolo". 

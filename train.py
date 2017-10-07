@@ -6,7 +6,7 @@ The configuration file is a json file and looks like this:
 
 {
     "model" : {
-        "architecture":         "Tiny Yolo",
+        "architecture":         "Full Yolo",
         "input_size":           416,
         "anchors":              [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828],
         "max_box_per_image":    10,        
@@ -27,7 +27,9 @@ The configuration file is a json file and looks like this:
         "object_scale":         5.0 ,
         "no_object_scale":      1.0,
         "coord_scale":          1.0,
-        "class_scale":          1.0
+        "class_scale":          1.0,
+
+        "debug":                true
     },
 
     "valid": {
@@ -37,7 +39,6 @@ The configuration file is a json file and looks like this:
         "valid_times":          1
     }
 }
-
 """
 
 import argparse
@@ -48,7 +49,7 @@ from models import YOLO
 import json
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="7"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 argparser = argparse.ArgumentParser(
     description='Train and validate YOLO_v2 model on any dataset')
