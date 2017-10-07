@@ -19,7 +19,7 @@ This project aims to implement all the details of YOLOv2 in Keras with Tensorflo
 
 Dataset from shttps://github.com/datitran/raccoon_dataset.
 
-### Raccon detection
+### Kangaroo detection
 <a href="https://youtu.be/vjmFzEP1qZw?t=34" rel="some text"><p align="center"><img src="https://i.imgur.com/v606VZX.jpg" height="300"></p></a>
 
 Dataset to be released.
