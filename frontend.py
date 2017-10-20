@@ -4,14 +4,13 @@ from keras.layers.advanced_activations import LeakyReLU
 import tensorflow as tf
 import numpy as np
 import cv2
+from keras.applications.mobilenet import MobileNet
 from keras.layers.merge import concatenate
 from keras.optimizers import SGD, Adam, RMSprop
 from preprocessing import BatchGenerator
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from utils import BoundBox
-
-FULL_YOLO_FEATURE_PATH = "full_yolo_features.h5" # should be hosted on a server
-TINY_YOLO_FEATURE_PATH = "tiny_yolo_features.h5" # should be hosted on a server
+from backend import TinyYoloFeature, FullYoloFeature, MobileNetFeature, SqueezeNetFeature, Inception3Feature
 
 class YOLO(object):
     def __init__(self, architecture,
@@ -21,8 +20,6 @@ class YOLO(object):
                        anchors):
 
         self.input_size = input_size
-        self.grid_h = input_size/32
-        self.grid_w = input_size/32
         
         self.labels   = list(labels)
         self.nb_class = len(self.labels)
@@ -36,193 +33,40 @@ class YOLO(object):
         # Make the model
         ##########################
 
-        if architecture == 'Full Yolo':
-            # the function to implement the orgnization layer (thanks to github.com/allanzelener/YAD2K)
-            def space_to_depth_x2(x):
-                return tf.space_to_depth(x, block_size=2)
+        # make the feature extractor layers
+        input_image     = Input(shape=(self.input_size, self.input_size, 3))
+        self.true_boxes = Input(shape=(1, 1, 1, max_box_per_image , 4))  
 
-            input_image = Input(shape=(self.input_size, self.input_size, 3))
-            self.true_boxes = Input(shape=(1, 1, 1, max_box_per_image , 4))            
-
-            # Layer 1
-            x = Conv2D(32, (3,3), strides=(1,1), padding='same', name='conv_1', use_bias=False)(input_image)
-            x = BatchNormalization(name='norm_1')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-            x = MaxPooling2D(pool_size=(2, 2))(x)
-
-            # Layer 2
-            x = Conv2D(64, (3,3), strides=(1,1), padding='same', name='conv_2', use_bias=False)(x)
-            x = BatchNormalization(name='norm_2')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-            x = MaxPooling2D(pool_size=(2, 2))(x)
-
-            # Layer 3
-            x = Conv2D(128, (3,3), strides=(1,1), padding='same', name='conv_3', use_bias=False)(x)
-            x = BatchNormalization(name='norm_3')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 4
-            x = Conv2D(64, (1,1), strides=(1,1), padding='same', name='conv_4', use_bias=False)(x)
-            x = BatchNormalization(name='norm_4')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 5
-            x = Conv2D(128, (3,3), strides=(1,1), padding='same', name='conv_5', use_bias=False)(x)
-            x = BatchNormalization(name='norm_5')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-            x = MaxPooling2D(pool_size=(2, 2))(x)
-
-            # Layer 6
-            x = Conv2D(256, (3,3), strides=(1,1), padding='same', name='conv_6', use_bias=False)(x)
-            x = BatchNormalization(name='norm_6')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 7
-            x = Conv2D(128, (1,1), strides=(1,1), padding='same', name='conv_7', use_bias=False)(x)
-            x = BatchNormalization(name='norm_7')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 8
-            x = Conv2D(256, (3,3), strides=(1,1), padding='same', name='conv_8', use_bias=False)(x)
-            x = BatchNormalization(name='norm_8')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-            x = MaxPooling2D(pool_size=(2, 2))(x)
-
-            # Layer 9
-            x = Conv2D(512, (3,3), strides=(1,1), padding='same', name='conv_9', use_bias=False)(x)
-            x = BatchNormalization(name='norm_9')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 10
-            x = Conv2D(256, (1,1), strides=(1,1), padding='same', name='conv_10', use_bias=False)(x)
-            x = BatchNormalization(name='norm_10')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 11
-            x = Conv2D(512, (3,3), strides=(1,1), padding='same', name='conv_11', use_bias=False)(x)
-            x = BatchNormalization(name='norm_11')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 12
-            x = Conv2D(256, (1,1), strides=(1,1), padding='same', name='conv_12', use_bias=False)(x)
-            x = BatchNormalization(name='norm_12')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 13
-            x = Conv2D(512, (3,3), strides=(1,1), padding='same', name='conv_13', use_bias=False)(x)
-            x = BatchNormalization(name='norm_13')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            skip_connection = x
-
-            x = MaxPooling2D(pool_size=(2, 2))(x)
-
-            # Layer 14
-            x = Conv2D(1024, (3,3), strides=(1,1), padding='same', name='conv_14', use_bias=False)(x)
-            x = BatchNormalization(name='norm_14')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 15
-            x = Conv2D(512, (1,1), strides=(1,1), padding='same', name='conv_15', use_bias=False)(x)
-            x = BatchNormalization(name='norm_15')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 16
-            x = Conv2D(1024, (3,3), strides=(1,1), padding='same', name='conv_16', use_bias=False)(x)
-            x = BatchNormalization(name='norm_16')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 17
-            x = Conv2D(512, (1,1), strides=(1,1), padding='same', name='conv_17', use_bias=False)(x)
-            x = BatchNormalization(name='norm_17')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 18
-            x = Conv2D(1024, (3,3), strides=(1,1), padding='same', name='conv_18', use_bias=False)(x)
-            x = BatchNormalization(name='norm_18')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 19
-            x = Conv2D(1024, (3,3), strides=(1,1), padding='same', name='conv_19', use_bias=False)(x)
-            x = BatchNormalization(name='norm_19')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 20
-            x = Conv2D(1024, (3,3), strides=(1,1), padding='same', name='conv_20', use_bias=False)(x)
-            x = BatchNormalization(name='norm_20')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 21
-            skip_connection = Conv2D(64, (1,1), strides=(1,1), padding='same', name='conv_21', use_bias=False)(skip_connection)
-            skip_connection = BatchNormalization(name='norm_21')(skip_connection)
-            skip_connection = LeakyReLU(alpha=0.1)(skip_connection)
-            skip_connection = Lambda(space_to_depth_x2)(skip_connection)
-
-            x = concatenate([skip_connection, x])
-
-            # Layer 22
-            x = Conv2D(1024, (3,3), strides=(1,1), padding='same', name='conv_22', use_bias=False)(x)
-            x = BatchNormalization(name='norm_22')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 23
-            x = Conv2D(self.nb_box * (4 + 1 + self.nb_class), (1,1), strides=(1,1), padding='same', name='conv_23', kernel_initializer='lecun_normal')(x)
-            output = Reshape((self.grid_h, self.grid_w, self.nb_box, 4 + 1 + self.nb_class))(x)
-
-            # a small hack to allow true_boxes to be registered when Keras build the model 
-            # for more information: https://github.com/fchollet/keras/issues/2790
-            output = Lambda(lambda args: args[0])([output, self.true_boxes])
-
-            self.model = Model([input_image, self.true_boxes], output)
-
-            # load the pretrained weights of all layers except the last convolutional layer
-            self.model.load_weights(FULL_YOLO_FEATURE_PATH, by_name=True)
-
+        if architecture == 'Inception3':
+            self.feature_extractor = Inception3Feature(self.input_size)  
+        elif architecture == 'SqueezeNet':
+            self.feature_extractor = SqueezeNetFeature(self.input_size)        
+        elif architecture == 'MobileNet':
+            self.feature_extractor = MobileNetFeature(self.input_size)
+        elif architecture == 'Full Yolo':
+            self.feature_extractor = FullYoloFeature(self.input_size)
         elif architecture == 'Tiny Yolo':
-            # Layer 1
-            input_image = Input(shape=(self.input_size, self.input_size, 3))
-            self.true_boxes = Input(shape=(1, 1, 1, max_box_per_image , 4))            
-
-            # Layer 1
-            x = Conv2D(16, (3,3), strides=(1,1), padding='same', name='conv_1', use_bias=False)(input_image)
-            x = BatchNormalization(name='norm_1')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-            x = MaxPooling2D(pool_size=(2, 2))(x)
-
-            # Layer 2 - 5
-            for i in range(0,4):
-                x = Conv2D(32*(2**i), (3,3), strides=(1,1), padding='same', name='conv_' + str(i+2), use_bias=False)(x)
-                x = BatchNormalization(name='norm_' + str(i+2))(x)
-                x = LeakyReLU(alpha=0.1)(x)
-                x = MaxPooling2D(pool_size=(2, 2))(x)
-
-            # Layer 6
-            x = Conv2D(512, (3,3), strides=(1,1), padding='same', name='conv_6', use_bias=False)(x)
-            x = BatchNormalization(name='norm_6')(x)
-            x = LeakyReLU(alpha=0.1)(x)
-            x = MaxPooling2D(pool_size=(2, 2), strides=(1,1), padding='same')(x)
-
-            # Layer 7 - 8
-            for i in range(0,2):
-                x = Conv2D(1024, (3,3), strides=(1,1), padding='same', name='conv_' + str(i+7), use_bias=False)(x)
-                x = BatchNormalization(name='norm_' + str(i+7))(x)
-                x = LeakyReLU(alpha=0.1)(x)
-
-            # Layer 9
-            x = Conv2D(self.nb_box * (4 + 1 + self.nb_class), (1,1), strides=(1,1), padding='same', name='conv_9', kernel_initializer='lecun_normal')(x)
-            output = Reshape((self.grid_h, self.grid_w, self.nb_box, 4 + 1 + self.nb_class))(x)
-
-            output = Lambda(lambda args: args[0])([output, self.true_boxes])
-
-            self.model = Model([input_image, self.true_boxes], output)
-
-            # load the pretrained weights of all layers except the last convolutional layer
-            self.model.load_weights(TINY_YOLO_FEATURE_PATH, by_name=True)     
-                  
+            self.feature_extractor = TinyYoloFeature(self.input_size)
         else:
             raise Exception('Architecture not supported! Only support Full Yolo and Tiny Yolo at the moment!')
 
-        layer = self.model.layers[-4] # the last convolutional layer
+        print self.feature_extractor.get_output_shape()    
+        self.grid_h, self.grid_w = self.feature_extractor.get_output_shape()        
+        features = self.feature_extractor.extract(input_image)            
+
+        # make the object detection layer
+        output = Conv2D(self.nb_box * (4 + 1 + self.nb_class), 
+                        (1,1), strides=(1,1), 
+                        padding='same', 
+                        name='conv_23', 
+                        kernel_initializer='lecun_normal')(features)
+        output = Reshape((self.grid_h, self.grid_w, self.nb_box, 4 + 1 + self.nb_class))(output)
+        output = Lambda(lambda args: args[0])([output, self.true_boxes])
+
+        self.model = Model([input_image, self.true_boxes], output)
+        
+        # initialize the weights of the detection layer
+        layer = self.model.layers[-4]
         weights = layer.get_weights()
 
         new_kernel = np.random.normal(size=weights[0].shape)/(self.grid_h*self.grid_w)
@@ -230,6 +74,7 @@ class YOLO(object):
 
         layer.set_weights([new_kernel, new_bias])
 
+        # print a summary of the whole model
         self.model.summary()
 
     def custom_loss(self, y_true, y_pred):
@@ -382,16 +227,12 @@ class YOLO(object):
     def load_weights(self, weight_path):
         self.model.load_weights(weight_path)
 
-    def preprocess(self, image):
-        input_image = cv2.resize(image, (self.input_size, self.input_size))
-        input_image = input_image / 255.
-        input_image = input_image[:,:,::-1]
-        input_image = np.expand_dims(input_image, 0)
-
-        return input_image
-
     def predict(self, image):
-        input_image = self.preprocess(image)
+        image = cv2.resize(image, (self.input_size, self.input_size))
+        image = self.feature_extractor.normalize(image)
+
+        input_image = image[:,:,::-1]
+        input_image = np.expand_dims(input_image, 0)
         dummy_array = dummy_array = np.zeros((1,1,1,1,self.max_box_per_image,4))
 
         netout = self.model.predict([input_image, dummy_array])[0]
@@ -510,7 +351,8 @@ class YOLO(object):
                     no_object_scale,
                     coord_scale,
                     class_scale,
-                    debug):     
+                    saved_weights_name='best_weights.h5',
+                    debug=False):     
 
         self.batch_size = batch_size
         self.warmup_bs  = warmup_bs 
@@ -546,8 +388,13 @@ class YOLO(object):
             'TRUE_BOX_BUFFER' : self.max_box_per_image,
         }    
 
-        train_batch = BatchGenerator(train_imgs, generator_config)
-        valid_batch = BatchGenerator(valid_imgs, generator_config, jitter=False)
+        train_batch = BatchGenerator(train_imgs, 
+                                     generator_config, 
+                                     norm=self.feature_extractor.normalize)
+        valid_batch = BatchGenerator(valid_imgs, 
+                                     generator_config, 
+                                     norm=self.feature_extractor.normalize,
+                                     jitter=False)
 
         ############################################
         # Make a few callbacks
@@ -558,7 +405,7 @@ class YOLO(object):
                            patience=3, 
                            mode='min', 
                            verbose=1)
-        checkpoint = ModelCheckpoint('best_weights.h5', 
+        checkpoint = ModelCheckpoint(saved_weights_name, 
                                      monitor='val_loss', 
                                      verbose=1, 
                                      save_best_only=True, 
@@ -580,4 +427,4 @@ class YOLO(object):
                                  validation_data  = valid_batch.get_generator(),
                                  validation_steps = valid_batch.get_dateset_size() * valid_times,
                                  callbacks        = [early_stop, checkpoint, tensorboard], 
-                                 max_queue_size   = 3)
+                                 max_queue_size   = 8)

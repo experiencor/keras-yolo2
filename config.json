@@ -8,21 +8,22 @@
     },
 
     "train": {
-        "train_image_folder":   "/home/andy/data/raccoon_dataset/images/",
-        "train_annot_folder":   "/home/andy/data/raccoon_dataset/anns/",      
+        "train_image_folder":   "/home/andy/github/raccoon_dataset/images/",
+        "train_annot_folder":   "/home/andy/github/raccoon_dataset/annotations/",     
           
         "train_times":          10,
-        "pretrained_weights":   "",
+        "pretrained_weights":   "full_yolo_raccoon.h5",
         "batch_size":           16,
         "learning_rate":        1e-4,
         "nb_epoch":             50,
-        "warmup_batches":       100,
+        "warmup_batches":       250,
 
         "object_scale":         5.0 ,
         "no_object_scale":      1.0,
         "coord_scale":          1.0,
         "class_scale":          1.0,
 
+        "saved_weights_name":   "full_yolo_raccoon.h5",
         "debug":                true
     },
 

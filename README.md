@@ -8,29 +8,35 @@ This project aims to implement all the details of YOLOv2 in Keras with Tensorflo
 - [x] Raccoon detection
 - [x] Self-driving car
 - [x] Kangaroo detection
-- [ ] SqueezeNet backend
-- [ ] MobileNet backend
+- [x] SqueezeNet backend
+- [x] MobileNet backend
+- [x] InceptionV3 backend
 - [ ] Multiscale training
 
-## Some example applications:
+## Some example applications (click for videos):
 
 ### Raccon detection
 <a href="https://www.youtube.com/watch?v=aibuvj2-zxA" rel="some text"><p align="center"><img src="https://i.imgur.com/6okeDjz.jpg" height="300"></p></a>
 
-Dataset from shttps://github.com/datitran/raccoon_dataset.
+Dataset => https://github.com/experiencor/raccoon_dataset
 
 ### Kangaroo detection
 <a href="https://youtu.be/vjmFzEP1qZw?t=34" rel="some text"><p align="center"><img src="https://i.imgur.com/v606VZX.jpg" height="300"></p></a>
 
-Dataset to be released.
+Dataset => https://github.com/experiencor/kangaroo
 
 ### Self-driving Car
 <a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center"><img src="https://i.imgur.com/kEc9ptL.jpg" height="300"></p></a>
 
-Trained on COCO dataset and did detection on a random dashcam video.
+Dataset => http://cocodataset.org/#detections-challenge2017
+
+### Red blod cell detection
+<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center"><img src="https://i.imgur.com/1vmIJKL.jpg" height="300"></p></a>
+
+Dataset => https://github.com/cosmicad/dataset
 
 ## Usage for python code
-### Data preparation
+### 1. Data preparation
 Download the Raccoon dataset from from https://github.com/datitran/raccoon_dataset.
 
 Organize the dataset into 4 folders:
@@ -45,7 +51,7 @@ Organize the dataset into 4 folders:
     
 There is a one-to-one correspondence by file name between images and annotations. If the validation set is empty, the training set will be automatically splitted into the training set and validation set using the ratio of 0.8.
 
-### Edit the configuration file
+### 2. Edit the configuration file
 The configuration file is a json file, which looks like this:
 
 ```python
@@ -89,19 +95,25 @@ The configuration file is a json file, which looks like this:
 
 The model section defines the type of the model to construct as well as other parameters of the model such as the input image size and the list of anchors. Two achitectures are supported at the moment: "Tiny Yolo" and "Full Yolo". 
 
-Download pretrained weights of tiny yolo: https://1drv.ms/u/s!ApLdDEW3ut5fa5Z9jibkqUGG-CA
+Download pretrained features of tiny yolo, full yolo, squeezenet, mobilenet, and inceptionV3 at:
 
-Download pretrained weights of full yolo: https://1drv.ms/u/s!ApLdDEW3ut5fbAMIhQAO1A26n2A
+https://1drv.ms/f/s!ApLdDEW3ut5fec2OzK4S4RpT-SU
 
-Important! Plese remember to change "labels" to the list of labels that you want to detect.
+These weights must be put in the root folder of the repository. They are the pretrained weights for all the layers except the last layer and will be loaded during model creation. The last layer has different sizes for different numbers of classes and should be re-trained.
 
-### Start the training process
+The link to the pretrained weights for the whole model of the raccoon detector can be downloaded at:
+
+https://1drv.ms/f/s!ApLdDEW3ut5feoZAEUwmSMYdPlY
+
+These weights can be used as the pretrained weights for any one class object detectors.
+
+### 3. Start the training process
 
 `python train.py -c config.json`
 
-By the end of this process, the code will write the weights of the best model to file best_weights.h5. The training process stops when the loss on the validation set is not improved in 3 consecutive epoches.
+By the end of this process, the code will write the weights of the best model to file best_weights.h5 (or whatever name specified in the setting "saved_weights_name" in the config.json file). The training process stops when the loss on the validation set is not improved in 3 consecutive epoches.
 
-### Perform detection using trained weights on an image by running
+### 4. Perform detection using trained weights on an image by running
 `python predict.py -c config.json -w /path/to/best_weights.h5 -i /path/to/image`
 
 It carries out detection on the image and write the image with detected bounding boxes to the same folder.

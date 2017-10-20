@@ -45,7 +45,7 @@ import argparse
 import os
 import numpy as np
 from preprocessing import parse_annotation
-from models import YOLO
+from frontend import YOLO
 import json
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
@@ -107,25 +107,27 @@ def _main_(args):
     ###############################    
 
     if os.path.exists(config['train']['pretrained_weights']):
+        print "Loading pre-trained weights in", config['train']['pretrained_weights']
         yolo.load_weights(config['train']['pretrained_weights'])
 
     ###############################
     #   Start the training process 
     ###############################
 
-    yolo.train(train_imgs       = train_imgs,
-               valid_imgs       = valid_imgs,
-               train_times      = config['train']['train_times'],
-               valid_times      = config['valid']['valid_times'],
-               nb_epoch         = config['train']['nb_epoch'], 
-               learning_rate    = config['train']['learning_rate'], 
-               batch_size       = config['train']['batch_size'],
-               warmup_bs        = config['train']['warmup_batches'],
-               object_scale     = config['train']['object_scale'],
-               no_object_scale  = config['train']['no_object_scale'],
-               coord_scale      = config['train']['coord_scale'],
-               class_scale      = config['train']['class_scale'],
-               debug            = config['train']['debug'])
+    yolo.train(train_imgs         = train_imgs,
+               valid_imgs         = valid_imgs,
+               train_times        = config['train']['train_times'],
+               valid_times        = config['valid']['valid_times'],
+               nb_epoch           = config['train']['nb_epoch'], 
+               learning_rate      = config['train']['learning_rate'], 
+               batch_size         = config['train']['batch_size'],
+               warmup_bs          = config['train']['warmup_batches'],
+               object_scale       = config['train']['object_scale'],
+               no_object_scale    = config['train']['no_object_scale'],
+               coord_scale        = config['train']['coord_scale'],
+               class_scale        = config['train']['class_scale'],
+               saved_weights_name = config['train']['saved_weights_name'],
+               debug              = config['train']['debug'])
 
 if __name__ == '__main__':
     args = argparser.parse_args()

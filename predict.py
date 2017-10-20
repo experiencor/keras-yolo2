@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from preprocessing import parse_annotation
 from utils import draw_boxes
-from models import YOLO
+from frontend import YOLO
 import json
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
@@ -43,16 +43,17 @@ def _main_(args):
     #   Make the model 
     ###############################
 
-    yolo = YOLO(architecture=config['model']['architecture'],
-                input_size=config['model']['input_size'], 
-                labels=config['model']['labels'], 
-                max_box_per_image=config['model']['max_box_per_image'],
-                anchors=config['model']['anchors'])
+    yolo = YOLO(architecture        = config['model']['architecture'],
+                input_size          = config['model']['input_size'], 
+                labels              = config['model']['labels'], 
+                max_box_per_image   = config['model']['max_box_per_image'],
+                anchors             = config['model']['anchors'])
 
     ###############################
     #   Load trained weights
     ###############################    
 
+    print weights_path
     yolo.load_weights(weights_path)
 
     ###############################

@@ -55,7 +55,8 @@ class BatchGenerator:
                        config, 
                        shuffle=True, 
                        jitter=True, 
-                       norm=True):
+                       norm=None):
+        self.generator = None
 
         self.images = images
         self.config = config
@@ -127,6 +128,12 @@ class BatchGenerator:
         if shuffle: np.random.shuffle(self.images)
 
     def get_generator(self):
+        if self.generator == None:
+            self.generator = self.make_generator()
+
+        return self.generator
+
+    def make_generator(self):
         num_img = len(self.images)
         
         total_count = 0
@@ -182,9 +189,9 @@ class BatchGenerator:
                                     max_iou     = iou
                                     
                             # assign ground truth x, y, w, h, confidence and class probs to y_batch
-                            y_batch[batch_count, grid_y, grid_x, best_anchor, 0:4]        = box
-                            y_batch[batch_count, grid_y, grid_x, best_anchor, 4  ]        = 1.
-                            y_batch[batch_count, grid_y, grid_x, best_anchor, 5  ]        = obj_indx
+                            y_batch[batch_count, grid_y, grid_x, best_anchor, 0:4] = box
+                            y_batch[batch_count, grid_y, grid_x, best_anchor, 4  ] = 1.
+                            y_batch[batch_count, grid_y, grid_x, best_anchor, 5  ] = obj_indx
                             
                             # assign the true box to b_batch
                             b_batch[batch_count, 0, 0, 0, true_box_index] = box
@@ -193,8 +200,8 @@ class BatchGenerator:
                             true_box_index = true_box_index % self.config['TRUE_BOX_BUFFER']
                                 
                 # assign input image to x_batch
-                if self.norm: 
-                    x_batch[batch_count] = normalize(img)
+                if self.norm != None: 
+                    x_batch[batch_count] = self.norm(img)
                 else:
                     # plot image and bounding boxes for sanity check
                     for obj in all_objs:
