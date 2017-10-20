@@ -48,7 +48,7 @@ class YOLO(object):
         elif architecture == 'Tiny Yolo':
             self.feature_extractor = TinyYoloFeature(self.input_size)
         else:
-            raise Exception('Architecture not supported! Only support Full Yolo and Tiny Yolo at the moment!')
+            raise Exception('Architecture not supported! Only support Full Yolo, Tiny Yolo, MobileNet, SqueezeNet, and Inception3 at the moment!')
 
         print self.feature_extractor.get_output_shape()    
         self.grid_h, self.grid_w = self.feature_extractor.get_output_shape()        

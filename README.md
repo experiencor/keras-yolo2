@@ -35,6 +35,11 @@ Dataset => http://cocodataset.org/#detections-challenge2017
 
 Dataset => https://github.com/cosmicad/dataset
 
+### Hand detection
+<a href="https://www.youtube.com/watch?v=p3-3kN_fIz0" rel="some text"><p align="center"><img src="https://i.imgur.com/75imQQz.jpg" height="300"></p></a>
+
+Dataset => https://github.com/cosmicad/dataset
+
 ## Usage for python code
 ### 1. Data preparation
 Download the Raccoon dataset from from https://github.com/datitran/raccoon_dataset.
@@ -57,7 +62,7 @@ The configuration file is a json file, which looks like this:
 ```python
 {
     "model" : {
-        "architecture":         "Full Yolo",    # should be either "Tiny Yolo" or "Full Yolo"
+        "architecture":         "Full Yolo",    # "Tiny Yolo" or "Full Yolo" or "MobileNet" or "SqueezeNet" or "Inception3"
         "input_size":           416,
         "anchors":              [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828],
         "max_box_per_image":    10,        
