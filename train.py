@@ -88,7 +88,7 @@ def _main_(args):
         train_imgs = train_imgs[:train_valid_split]
 
     if len(set(config['model']['labels']).intersection(train_labels)) == 0:
-        print "Labels to be detected are not present in the dataset! Please revise the list of labels in the config.json file!"
+        print ("Labels to be detected are not present in the dataset! Please revise the list of labels in the config.json file!")
         
         return
 
@@ -107,7 +107,7 @@ def _main_(args):
     ###############################    
 
     if os.path.exists(config['train']['pretrained_weights']):
-        print "Loading pre-trained weights in", config['train']['pretrained_weights']
+        print ("Loading pre-trained weights in", config['train']['pretrained_weights'])
         yolo.load_weights(config['train']['pretrained_weights'])
 
     ###############################
