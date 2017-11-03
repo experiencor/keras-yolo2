@@ -6,10 +6,10 @@ from keras.layers.merge import concatenate
 from keras.applications.mobilenet import MobileNet
 from keras.applications import InceptionV3
 
-FULL_YOLO_FEATURE_PATH  = "full_yolo_features.h5"  # should be hosted on a server
-TINY_YOLO_FEATURE_PATH  = "tiny_yolo_features.h5"  # should be hosted on a server
-SQUEEZENET_FEATURE_PATH = "squeezenet_features.h5" # should be hosted on a server
-MOBILENET_FEATURE_PATH  = "mobilenet_features.h5"  # should be hosted on a server
+FULL_YOLO_FEATURE_PATH  = "full_yolo_features.h5"   # should be hosted on a server
+TINY_YOLO_FEATURE_PATH  = "tiny_yolo_features.h5"   # should be hosted on a server
+SQUEEZENET_FEATURE_PATH = "squeezenet_features.h5"  # should be hosted on a server
+MOBILENET_FEATURE_PATH  = "mobilenet_features.h5"   # should be hosted on a server
 INCEPTION3_FEATURE_PATH = "inception3_features.h5"  # should be hosted on a server
 
 class BaseFeatureExtractor(object):
@@ -285,7 +285,7 @@ class Inception3Feature(BaseFeatureExtractor):
         input_image = Input(shape=(input_size, input_size, 3))
 
         inception = InceptionV3(input_shape=(input_size,input_size,3), include_top=False)
-        #mobilenet.load_weights(MOBILENET_FEATURE_PATH)
+        inception.load_weights(INCEPTION3_FEATURE_PATH)
 
         x = inception(input_image)
 

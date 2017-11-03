@@ -64,7 +64,7 @@ def _main_(args):
     config_path = args.conf
 
     with open(config_path) as config_buffer:    
-        config = json.load(config_buffer)
+        config = json.loads(config_buffer.read())
 
     ###############################
     #   Parse the annotations 
@@ -87,9 +87,10 @@ def _main_(args):
         valid_imgs = train_imgs[train_valid_split:]
         train_imgs = train_imgs[:train_valid_split]
 
-    if len(set(config['model']['labels']).intersection(train_labels)) == 0:
+    print train_labels
+
+    if len(set(config['model']['labels']).intersection(set(train_labels.keys()))) == 0:
         print "Labels to be detected are not present in the dataset! Please revise the list of labels in the config.json file!"
-        
         return
 
     ###############################

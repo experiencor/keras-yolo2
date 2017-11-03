@@ -98,7 +98,7 @@ The configuration file is a json file, which looks like this:
 
 ```
 
-The model section defines the type of the model to construct as well as other parameters of the model such as the input image size and the list of anchors. Two achitectures are supported at the moment: "Tiny Yolo" and "Full Yolo". 
+The model section defines the type of the model to construct as well as other parameters of the model such as the input image size and the list of anchors. 
 
 Download pretrained features of tiny yolo, full yolo, squeezenet, mobilenet, and inceptionV3 at:
 

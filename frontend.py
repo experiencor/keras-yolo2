@@ -220,7 +220,13 @@ class YOLO(object):
             current_recall = nb_pred_box/(nb_true_box + 1e-6)
             total_recall = tf.assign_add(total_recall, current_recall) 
 
-            loss = tf.Print(loss, [loss_xy, loss_wh, loss_conf, loss_class, loss, current_recall, total_recall/seen], message='DEBUG', summarize=1000)
+            loss = tf.Print(loss, [loss_xy], message='Loss XY \t', summarize=1000)
+            loss = tf.Print(loss, [loss_wh], message='Loss WH \t', summarize=1000)
+            loss = tf.Print(loss, [loss_conf], message='Loss Conf \t', summarize=1000)
+            loss = tf.Print(loss, [loss_class], message='Loss Class \t', summarize=1000)
+            loss = tf.Print(loss, [loss], message='Total Loss \t', summarize=1000)
+            loss = tf.Print(loss, [current_recall], message='Current Recall \t', summarize=1000)
+            loss = tf.Print(loss, [total_recall/seen], message='Average Recall \t', summarize=1000)
         
         return loss
 
@@ -420,11 +426,12 @@ class YOLO(object):
         # Start the training process
         ############################################        
 
-        self.model.fit_generator(generator        = train_batch.get_generator(), 
-                                 steps_per_epoch  = train_batch.get_dateset_size() * train_times, 
+        self.model.fit_generator(generator        = train_batch, 
+                                 steps_per_epoch  = len(train_batch) * train_times, 
                                  epochs           = nb_epoch, 
                                  verbose          = 1,
-                                 validation_data  = valid_batch.get_generator(),
-                                 validation_steps = valid_batch.get_dateset_size() * valid_times,
+                                 validation_data  = valid_batch,
+                                 validation_steps = len(valid_batch) * valid_times,
                                  callbacks        = [early_stop, checkpoint, tensorboard], 
+                                 workers          = 3,
                                  max_queue_size   = 8)
