@@ -173,7 +173,7 @@ class BatchGenerator(Sequence):
                         obj_indx  = self.config['LABELS'].index(obj['name'])
                         
                         center_w = (obj['xmax'] - obj['xmin']) / (float(self.config['IMAGE_W']) / self.config['GRID_W']) # unit: grid cell
-                        center_h = (obj['ymax'] - obj['ymin']) / (float(self.config['IMAGE_W']) / self.config['GRID_W']) # unit: grid cell
+                        center_h = (obj['ymax'] - obj['ymin']) / (float(self.config['IMAGE_H']) / self.config['GRID_H']) # unit: grid cell
                         
                         box = [center_x, center_y, center_w, center_h]
 

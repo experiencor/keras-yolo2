@@ -11,7 +11,7 @@ from frontend import YOLO
 import json
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]=""
 
 argparser = argparse.ArgumentParser(
     description='Train and validate YOLO_v2 model on any dataset')
@@ -60,12 +60,6 @@ def _main_(args):
     ###############################
     #   Predict bounding boxes 
     ###############################
-
-    # if it's an image, do detection, save image with bounding boxes to the same folder
-
-    # if it's a folder, do detection, save images with boundins boxes to another folder
-
-    # if result folder is present, save annotations to the result folder
 
     if image_path[-4:] == '.mp4':
         video_out = image_path[:-4] + '_detected' + image_path[-4:]

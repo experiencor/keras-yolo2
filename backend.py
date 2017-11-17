@@ -5,12 +5,16 @@ from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.merge import concatenate
 from keras.applications.mobilenet import MobileNet
 from keras.applications import InceptionV3
+from keras.applications.vgg16 import VGG16
+from keras.applications.resnet50 import ResNet50
 
 FULL_YOLO_FEATURE_PATH  = "full_yolo_features.h5"   # should be hosted on a server
 TINY_YOLO_FEATURE_PATH  = "tiny_yolo_features.h5"   # should be hosted on a server
 SQUEEZENET_FEATURE_PATH = "squeezenet_features.h5"  # should be hosted on a server
 MOBILENET_FEATURE_PATH  = "mobilenet_features.h5"   # should be hosted on a server
-INCEPTION3_FEATURE_PATH = "inception3_features.h5"  # should be hosted on a server
+INCEPTION3_FEATURE_PATH = "inception_features.h5"   # should be hosted on a server
+VGG16_FEATURE_PATH      = "vgg16_features.h5"       # should be hosted on a server
+RESNET50_FEATURE_PATH   = "resnet50_features.h5"    # should be hosted on a server
 
 class BaseFeatureExtractor(object):
     """docstring for ClassName"""
@@ -297,3 +301,48 @@ class Inception3Feature(BaseFeatureExtractor):
         image = image * 2.
 
         return image
+
+class VGG16Feature(BaseFeatureExtractor):
+    """docstring for ClassName"""
+    def __init__(self, input_size):
+        input_image = Input(shape=(input_size, input_size, 3))
+
+        vgg16 = VGG16(input_shape=(input_size, input_size, 3), include_top=False)
+        #vgg16.load_weights(VGG16_FEATURE_PATH)
+
+        x = vgg16(input_image)
+
+        self.feature_extractor = Model(input_image, x) 
+
+    def normalize(self, image):
+        image = image[..., ::-1]
+        image = image.astype('float')
+
+        image[..., 0] -= 103.939
+        image[..., 1] -= 116.779
+        image[..., 2] -= 123.68
+
+        return image 
+
+class ResNet50Feature(BaseFeatureExtractor):
+    """docstring for ClassName"""
+    def __init__(self, input_size):
+        input_image = Input(shape=(input_size, input_size, 3))
+
+        resnet50 = ResNet50(input_shape=(input_size, input_size, 3), include_top=False)
+        resnet50.layers.pop() # remove the average pooling layer
+        #resnet50.load_weights(RESNET50_FEATURE_PATH)
+
+        x = resnet50(input_image)
+
+        self.feature_extractor = Model(input_image, x) 
+
+    def normalize(self, image):
+        image = image[..., ::-1]
+        image = image.astype('float')
+
+        image[..., 0] -= 103.939
+        image[..., 1] -= 116.779
+        image[..., 2] -= 123.68
+
+        return image 

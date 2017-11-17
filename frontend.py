@@ -3,6 +3,7 @@ from keras.layers import Reshape, Activation, Conv2D, Input, MaxPooling2D, Batch
 from keras.layers.advanced_activations import LeakyReLU
 import tensorflow as tf
 import numpy as np
+import os
 import cv2
 from keras.applications.mobilenet import MobileNet
 from keras.layers.merge import concatenate
@@ -10,7 +11,7 @@ from keras.optimizers import SGD, Adam, RMSprop
 from preprocessing import BatchGenerator
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from utils import BoundBox
-from backend import TinyYoloFeature, FullYoloFeature, MobileNetFeature, SqueezeNetFeature, Inception3Feature
+from backend import TinyYoloFeature, FullYoloFeature, MobileNetFeature, SqueezeNetFeature, Inception3Feature, VGG16Feature, ResNet50Feature
 
 class YOLO(object):
     def __init__(self, architecture,
@@ -47,8 +48,12 @@ class YOLO(object):
             self.feature_extractor = FullYoloFeature(self.input_size)
         elif architecture == 'Tiny Yolo':
             self.feature_extractor = TinyYoloFeature(self.input_size)
+        elif architecture == 'VGG16':
+            self.feature_extractor = VGG16Feature(self.input_size)
+        elif architecture == 'ResNet50':
+            self.feature_extractor = VGG16Feature(self.input_size)
         else:
-            raise Exception('Architecture not supported! Only support Full Yolo, Tiny Yolo, MobileNet, SqueezeNet, and Inception3 at the moment!')
+            raise Exception('Architecture not supported! Only support Full Yolo, Tiny Yolo, MobileNet, SqueezeNet, VGG16, ResNet50, and Inception3 at the moment!')
 
         print self.feature_extractor.get_output_shape()    
         self.grid_h, self.grid_w = self.feature_extractor.get_output_shape()        
@@ -220,6 +225,7 @@ class YOLO(object):
             current_recall = nb_pred_box/(nb_true_box + 1e-6)
             total_recall = tf.assign_add(total_recall, current_recall) 
 
+            loss = tf.Print(loss, [tf.zeros((1))], message='Dummy Line \t', summarize=1000)
             loss = tf.Print(loss, [loss_xy], message='Loss XY \t', summarize=1000)
             loss = tf.Print(loss, [loss_wh], message='Loss WH \t', summarize=1000)
             loss = tf.Print(loss, [loss_conf], message='Loss Conf \t', summarize=1000)
@@ -417,8 +423,10 @@ class YOLO(object):
                                      save_best_only=True, 
                                      mode='min', 
                                      period=1)
-        tensorboard = TensorBoard(log_dir='~/logs/yolo/', 
+        tb_counter  = len([log for log in os.listdir(os.path.expanduser('~/logs/')) if 'yolo' in log]) + 1
+        tensorboard = TensorBoard(log_dir=os.path.expanduser('~/logs/') + 'yolo' + '_' + str(tb_counter), 
                                   histogram_freq=0, 
+                                  write_batch_performance=True,
                                   write_graph=True, 
                                   write_images=False)
 
