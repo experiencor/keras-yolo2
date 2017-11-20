@@ -305,14 +305,10 @@ class Inception3Feature(BaseFeatureExtractor):
 class VGG16Feature(BaseFeatureExtractor):
     """docstring for ClassName"""
     def __init__(self, input_size):
-        input_image = Input(shape=(input_size, input_size, 3))
-
         vgg16 = VGG16(input_shape=(input_size, input_size, 3), include_top=False)
         #vgg16.load_weights(VGG16_FEATURE_PATH)
 
-        x = vgg16(input_image)
-
-        self.feature_extractor = Model(input_image, x) 
+        self.feature_extractor = vgg16
 
     def normalize(self, image):
         image = image[..., ::-1]
@@ -327,15 +323,11 @@ class VGG16Feature(BaseFeatureExtractor):
 class ResNet50Feature(BaseFeatureExtractor):
     """docstring for ClassName"""
     def __init__(self, input_size):
-        input_image = Input(shape=(input_size, input_size, 3))
-
         resnet50 = ResNet50(input_shape=(input_size, input_size, 3), include_top=False)
         resnet50.layers.pop() # remove the average pooling layer
         #resnet50.load_weights(RESNET50_FEATURE_PATH)
 
-        x = resnet50(input_image)
-
-        self.feature_extractor = Model(input_image, x) 
+        self.feature_extractor = Model(resnet50.layers[0].input, resnet50.layers[-1].output)
 
     def normalize(self, image):
         image = image[..., ::-1]
