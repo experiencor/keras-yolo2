@@ -16,7 +16,7 @@
         "batch_size":           16,
         "learning_rate":        1e-4,
         "nb_epoch":             50,
-        "warmup_batches":       250,
+        "warmup_epochs":        3,
 
         "object_scale":         5.0 ,
         "no_object_scale":      1.0,

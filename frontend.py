@@ -51,7 +51,7 @@ class YOLO(object):
         elif architecture == 'VGG16':
             self.feature_extractor = VGG16Feature(self.input_size)
         elif architecture == 'ResNet50':
-            self.feature_extractor = VGG16Feature(self.input_size)
+            self.feature_extractor = ResNet50Feature(self.input_size)
         else:
             raise Exception('Architecture not supported! Only support Full Yolo, Tiny Yolo, MobileNet, SqueezeNet, VGG16, ResNet50, and Inception3 at the moment!')
 
@@ -95,7 +95,6 @@ class YOLO(object):
         class_mask = tf.zeros(mask_shape)
         
         seen = tf.Variable(0.)
-        
         total_recall = tf.Variable(0.)
         
         """
@@ -145,7 +144,7 @@ class YOLO(object):
         true_box_conf = iou_scores * y_true[..., 4]
         
         ### adjust class probabilities
-        true_box_class = tf.to_int32(y_true[..., 5])
+        true_box_class = tf.argmax(y_true[..., 5:], -1)
         
         """
         Determine the masks
@@ -358,7 +357,7 @@ class YOLO(object):
                     nb_epoch,       # number of epoches
                     learning_rate,  # the learning rate
                     batch_size,     # the size of the batch
-                    warmup_bs,      # number of initial batches to let the model familiarize with the new dataset
+                    warmup_epochs,  # number of initial batches to let the model familiarize with the new dataset
                     object_scale,
                     no_object_scale,
                     coord_scale,
@@ -367,7 +366,7 @@ class YOLO(object):
                     debug=False):     
 
         self.batch_size = batch_size
-        self.warmup_bs  = warmup_bs 
+        self.warmup_bs  = warmup_epochs * (train_times*(len(train_imgs)/batch_size+1) + valid_times*(len(valid_imgs)/batch_size+1))
 
         self.object_scale    = object_scale
         self.no_object_scale = no_object_scale
@@ -375,6 +374,8 @@ class YOLO(object):
         self.class_scale     = class_scale
 
         self.debug = debug
+
+        if warmup_epochs > 0: nb_epoch = warmup_epochs # if it's warmup stage, don't train more than warmup_epochs
 
         ############################################
         # Compile the model

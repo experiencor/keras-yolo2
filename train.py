@@ -22,7 +22,7 @@ The configuration file is a json file and looks like this:
         "batch_size":           16,
         "learning_rate":        1e-4,
         "nb_epoch":             50,
-        "warmup_batches":       100,
+        "warmup_epochs":        3,
 
         "object_scale":         5.0 ,
         "no_object_scale":      1.0,
@@ -127,7 +127,7 @@ def _main_(args):
                nb_epoch           = config['train']['nb_epoch'], 
                learning_rate      = config['train']['learning_rate'], 
                batch_size         = config['train']['batch_size'],
-               warmup_bs          = config['train']['warmup_batches'],
+               warmup_epochs      = config['train']['warmup_epochs'],
                object_scale       = config['train']['object_scale'],
                no_object_scale    = config['train']['no_object_scale'],
                coord_scale        = config['train']['coord_scale'],
