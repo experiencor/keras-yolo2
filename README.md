@@ -43,12 +43,6 @@ Dataset => https://github.com/cosmicad/dataset
 Dataset => http://cvrr.ucsd.edu/vivachallenge/index.php/hands/hand-detection/
 
 ## Usage for python code
-### 0. Requirements
-
-```
-pip install 'keras==2.0.8' (version 2.0.8 is required for multiple-class detection)
-
-```
 
 ### 1. Data preparation
 Download the Raccoon dataset from from https://github.com/experiencor/raccoon_dataset.
