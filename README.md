@@ -46,6 +46,7 @@ Dataset => http://cvrr.ucsd.edu/vivachallenge/index.php/hands/hand-detection/
 
 ### 0. Requirement
 
+python 2.7
 keras >= 2.0.8
 
 ### 1. Data preparation
@@ -149,3 +150,8 @@ Refer to the notebook (https://github.com/experiencor/basic-yolo-keras/blob/mast
 | Train        | Test          | mAP (with this implementation) | mAP (on released weights) |
 | -------------|:--------------|:------------------------:|:-------------------------:|
 | COCO train   | COCO val      | 28.6 |    42.1 |
+
+
+## Copyright
+
+See [LICENSE](LICENSE) for details.
