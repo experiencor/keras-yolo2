@@ -152,6 +152,7 @@ Refer to the notebook (https://github.com/experiencor/basic-yolo-keras/blob/mast
 | -------------|:--------------|:------------------------:|:-------------------------:|
 | COCO train   | COCO val      | 28.6 |    42.1 |
 
+The code to evaluate detection results can be found at https://github.com/experiencor/basic-yolo-keras/issues/27.
 
 ## Copyright
 
