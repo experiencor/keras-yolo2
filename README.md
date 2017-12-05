@@ -50,6 +50,8 @@ python 2.7
 
 keras >= 2.0.8
 
+imgaug
+
 ### 1. Data preparation
 Download the Raccoon dataset from from https://github.com/experiencor/raccoon_dataset.
 
