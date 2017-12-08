@@ -427,7 +427,7 @@ class YOLO(object):
         tb_counter  = len([log for log in os.listdir(os.path.expanduser('~/logs/')) if 'yolo' in log]) + 1
         tensorboard = TensorBoard(log_dir=os.path.expanduser('~/logs/') + 'yolo' + '_' + str(tb_counter), 
                                   histogram_freq=0, 
-                                  write_batch_performance=True,
+                                  #write_batch_performance=True,
                                   write_graph=True, 
                                   write_images=False)
 

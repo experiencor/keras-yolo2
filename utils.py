@@ -134,13 +134,13 @@ def decode_netout(netout, obj_threshold, nms_threshold, anchors, nb_class):
     for c in range(nb_class):
         sorted_indices = list(reversed(np.argsort([box.classes[c] for box in boxes])))
 
-        for i in xrange(len(sorted_indices)):
+        for i in range(len(sorted_indices)):
             index_i = sorted_indices[i]
             
             if boxes[index_i].classes[c] == 0: 
                 continue
             else:
-                for j in xrange(i+1, len(sorted_indices)):
+                for j in range(i+1, len(sorted_indices)):
                     index_j = sorted_indices[j]
                     
                     if bbox_iou(boxes[index_i], boxes[index_j]) >= nms_threshold:
