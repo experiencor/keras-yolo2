@@ -49,7 +49,10 @@ from frontend import YOLO
 import json
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+try:
+    os.environ["CUDA_VISIBLE_DEVICES"]
+except KeyError:    
+    os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 argparser = argparse.ArgumentParser(
     description='Train and validate YOLO_v2 model on any dataset')
