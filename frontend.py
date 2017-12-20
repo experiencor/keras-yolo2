@@ -24,7 +24,7 @@ class YOLO(object):
         
         self.labels   = list(labels)
         self.nb_class = len(self.labels)
-        self.nb_box   = 5
+        self.nb_box   = len(anchors)/2
         self.class_wt = np.ones(self.nb_class, dtype='float32')
         self.anchors  = anchors
 
