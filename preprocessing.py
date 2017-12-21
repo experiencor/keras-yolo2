@@ -26,7 +26,7 @@ def parse_annotation(ann_dir, img_dir, labels=[]):
                 img['height'] = int(elem.text)
             if 'size' in elem.tag:
                 for attr in list(elem):
-                    if 'depth' in atrr.tag:
+                    if 'depth' in attr.tag:
                         depth = int(attr.text)
             if 'object' in elem.tag or 'part' in elem.tag:
                 obj = {}
