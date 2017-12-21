@@ -74,7 +74,7 @@ def _main_(args):
     ###############################
 
     # parse annotations of the training set
-    train_imgs, train_labels = parse_annotation(config['train']['train_annot_folder'], 
+    train_imgs, train_labels, depth = parse_annotation(config['train']['train_annot_folder'], 
                                                 config['train']['train_image_folder'], 
                                                 config['model']['labels'])
 
@@ -106,7 +106,8 @@ def _main_(args):
     ###############################
 
     yolo = YOLO(architecture        = config['model']['architecture'],
-                input_size          = config['model']['input_size'], 
+                input_size          = config['model']['input_size'],
+                input_depth         = depth,
                 labels              = config['model']['labels'], 
                 max_box_per_image   = config['model']['max_box_per_image'],
                 anchors             = config['model']['anchors'])
