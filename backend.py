@@ -35,8 +35,8 @@ class BaseFeatureExtractor(object):
 
 class FullYoloFeature(BaseFeatureExtractor):
     """docstring for ClassName"""
-    def __init__(self, input_size):
-        input_image = Input(shape=(input_size, input_size, 3))
+    def __init__(self, input_size, input_depth):
+        input_image = Input(shape=(input_size, input_size, input_depth))
 
         # the function to implement the orgnization layer (thanks to github.com/allanzelener/YAD2K)
         def space_to_depth_x2(x):
