@@ -38,12 +38,17 @@ class FullYoloFeature(BaseFeatureExtractor):
     def __init__(self, input_size, input_depth):
         input_image = Input(shape=(input_size, input_size, input_depth))
 
+        # name of first layer
+        name_first_layer = 'conv_1'
+        if input_depth is 1:
+            name_first_layer = 'conv_1_depth1'
+        
         # the function to implement the orgnization layer (thanks to github.com/allanzelener/YAD2K)
         def space_to_depth_x2(x):
             return tf.space_to_depth(x, block_size=2)
 
         # Layer 1
-        x = Conv2D(32, (3,3), strides=(1,1), padding='same', name='conv_1', use_bias=False)(input_image)
+        x = Conv2D(32, (3,3), strides=(1,1), padding='same', name=name_first_layer, use_bias=False)(input_image)
         x = BatchNormalization(name='norm_1')(x)
         x = LeakyReLU(alpha=0.1)(x)
         x = MaxPooling2D(pool_size=(2, 2))(x)
@@ -164,7 +169,7 @@ class FullYoloFeature(BaseFeatureExtractor):
         x = LeakyReLU(alpha=0.1)(x)
 
         self.feature_extractor = Model(input_image, x)  
-        self.feature_extractor.load_weights(FULL_YOLO_BACKEND_PATH)
+        self.feature_extractor.load_weights(FULL_YOLO_BACKEND_PATH,by_name=True)
 
     def normalize(self, image):
         return image / 255.
