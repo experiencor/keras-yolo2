@@ -15,13 +15,14 @@ from backend import TinyYoloFeature, FullYoloFeature, MobileNetFeature, SqueezeN
 
 class YOLO(object):
     def __init__(self, architecture,
-                       input_size, 
+                       input_size,
+                       input_depth,
                        labels, 
                        max_box_per_image,
                        anchors):
 
         self.input_size = input_size
-        
+        self.input_depth = input_depth
         self.labels   = list(labels)
         self.nb_class = len(self.labels)
         self.nb_box   = len(anchors)/2
@@ -35,7 +36,7 @@ class YOLO(object):
         ##########################
 
         # make the feature extractor layers
-        input_image     = Input(shape=(self.input_size, self.input_size, 3))
+        input_image     = Input(shape=(self.input_size, self.input_size, self.input_depth))
         self.true_boxes = Input(shape=(1, 1, 1, max_box_per_image , 4))  
 
         if architecture == 'Inception3':
@@ -45,7 +46,7 @@ class YOLO(object):
         elif architecture == 'MobileNet':
             self.feature_extractor = MobileNetFeature(self.input_size)
         elif architecture == 'Full Yolo':
-            self.feature_extractor = FullYoloFeature(self.input_size)
+            self.feature_extractor = FullYoloFeature(self.input_size,self.input_depth)
         elif architecture == 'Tiny Yolo':
             self.feature_extractor = TinyYoloFeature(self.input_size)
         elif architecture == 'VGG16':
