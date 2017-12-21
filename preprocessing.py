@@ -59,7 +59,7 @@ def parse_annotation(ann_dir, img_dir, labels=[]):
         if len(img['object']) > 0:
             all_imgs += [img]
                         
-    return all_imgs, seen_labels
+    return all_imgs, seen_labels, depth
 
 class BatchGenerator(Sequence):
     def __init__(self, images, 
