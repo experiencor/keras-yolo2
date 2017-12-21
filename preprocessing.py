@@ -11,7 +11,7 @@ from utils import BoundBox, normalize, bbox_iou
 def parse_annotation(ann_dir, img_dir, labels=[]):
     all_imgs = []
     seen_labels = {}
-    
+    depth = 0;
     for ann in sorted(os.listdir(ann_dir)):
         img = {'object':[]}
         
@@ -24,6 +24,10 @@ def parse_annotation(ann_dir, img_dir, labels=[]):
                 img['width'] = int(elem.text)
             if 'height' in elem.tag:
                 img['height'] = int(elem.text)
+            if 'size' in elem.tag:
+                for attr in list(elem):
+                    if 'depth' in atrr.tag:
+                        depth = int(attr.text)
             if 'object' in elem.tag or 'part' in elem.tag:
                 obj = {}
                 
