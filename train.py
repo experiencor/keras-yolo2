@@ -80,7 +80,7 @@ def _main_(args):
 
     # parse annotations of the validation set, if any, otherwise split the training set
     if os.path.exists(config['valid']['valid_annot_folder']):
-        valid_imgs, valid_labels = parse_annotation(config['valid']['valid_annot_folder'], 
+        valid_imgs, valid_labels, depth = parse_annotation(config['valid']['valid_annot_folder'], 
                                                     config['valid']['valid_image_folder'], 
                                                     config['model']['labels'])
     else:
