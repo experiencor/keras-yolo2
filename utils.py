@@ -116,7 +116,7 @@ def decode_netout(netout, obj_threshold, nms_threshold, anchors, nb_class):
                 # from 4th element onwards are confidence and class classes
                 classes = netout[row,col,b,5:]
                 
-                if np.sum(classes) > 0:
+                if classes.any():
                     # first 4 elements are x, y, w, and h
                     x, y, w, h = netout[row,col,b,:4]
 
