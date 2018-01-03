@@ -70,6 +70,7 @@ class BatchGenerator(Sequence):
         self.generator = None
 
         self.images = images
+        self.imgdepth = 3
         self.config = config
 
         self.shuffle = shuffle
@@ -78,7 +79,13 @@ class BatchGenerator(Sequence):
 
         self.counter = 0
         self.anchors = [BoundBox(0, 0, config['ANCHORS'][2*i], config['ANCHORS'][2*i+1]) for i in range(int(len(config['ANCHORS'])//2))]
-
+    
+        #Evaluate image depth
+        img_first = cv2.imread(self.images[0]['filename'])
+        isgrey = np.all(img_first[:,:,0] == img_first[:,:,1]) and  np.all(img_first[:,:,0] == img_first[:,:,2])
+        if isgrey:
+                self.imgdepth = 1
+        
         ### augmentors by https://github.com/aleju/imgaug
         sometimes = lambda aug: iaa.Sometimes(0.5, aug)
 
@@ -152,7 +159,7 @@ class BatchGenerator(Sequence):
 
         instance_count = 0
 
-        x_batch = np.zeros((r_bound - l_bound, self.config['IMAGE_H'], self.config['IMAGE_W'], 3))                         # input images
+        x_batch = np.zeros((r_bound - l_bound, self.config['IMAGE_H'], self.config['IMAGE_W'], self.imgdepth))                         # input images
         b_batch = np.zeros((r_bound - l_bound, 1     , 1     , 1    ,  self.config['TRUE_BOX_BUFFER'], 4))   # list of self.config['TRUE_self.config['BOX']_BUFFER'] GT boxes
         y_batch = np.zeros((r_bound - l_bound, self.config['GRID_H'],  self.config['GRID_W'], self.config['BOX'], 4+1+self.config['CLASS']))                # desired network output
 
