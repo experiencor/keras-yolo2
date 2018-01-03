@@ -100,7 +100,7 @@ def _main_(args):
     if isgrey and depth==3:
         print "Annotation image depth does not match actual image depth. Use actual image depth"
         depth = 1
-    if isgrey == false and depth == 1
+    if isgrey == False and depth == 1:
         print "Annotation image depth does not match actual image depth. Use actual image depth"
         depth = 3
     
