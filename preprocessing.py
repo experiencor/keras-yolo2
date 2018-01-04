@@ -58,7 +58,6 @@ def parse_annotation(ann_dir, img_dir, labels=[]):
 
         if len(img['object']) > 0:
             all_imgs += [img]
-                        
     return all_imgs, seen_labels, depth
 
 class BatchGenerator(Sequence):
@@ -71,7 +70,7 @@ class BatchGenerator(Sequence):
 
         self.images = images
         self.imgdepth = 3
-        self.config = config
+	self.config = config
 
         self.shuffle = shuffle
         self.jitter  = jitter
@@ -79,14 +78,13 @@ class BatchGenerator(Sequence):
 
         self.counter = 0
         self.anchors = [BoundBox(0, 0, config['ANCHORS'][2*i], config['ANCHORS'][2*i+1]) for i in range(int(len(config['ANCHORS'])//2))]
-    
-        #Evaluate image depth
-        img_first = cv2.imread(self.images[0]['filename'])
-        isgrey = np.all(img_first[:,:,0] == img_first[:,:,1]) and  np.all(img_first[:,:,0] == img_first[:,:,2])
-        if isgrey:
-                self.imgdepth = 1
-        
-        ### augmentors by https://github.com/aleju/imgaug
+	
+	#Evaluate image depth
+ 	img_first = cv2.imread(self.images[0]['filename'])
+    	isgrey = np.all(img_first[:,:,0] == img_first[:,:,1]) and  np.all(img_first[:,:,0] == img_first[:,:,2])
+	if isgrey:
+        	self.imgdepth = 1       
+	### augmentors by https://github.com/aleju/imgaug
         sometimes = lambda aug: iaa.Sometimes(0.5, aug)
 
         # Define our sequence of augmentation steps that will be applied to every image
@@ -150,7 +148,7 @@ class BatchGenerator(Sequence):
         return int(np.ceil(float(len(self.images))/self.config['BATCH_SIZE']))   
 
     def __getitem__(self, idx):
-        l_bound = idx*self.config['BATCH_SIZE']
+	l_bound = idx*self.config['BATCH_SIZE']
         r_bound = (idx+1)*self.config['BATCH_SIZE']
 
         if r_bound > len(self.images):
@@ -158,7 +156,6 @@ class BatchGenerator(Sequence):
             l_bound = r_bound - self.config['BATCH_SIZE']
 
         instance_count = 0
-
         x_batch = np.zeros((r_bound - l_bound, self.config['IMAGE_H'], self.config['IMAGE_W'], self.imgdepth))                         # input images
         b_batch = np.zeros((r_bound - l_bound, 1     , 1     , 1    ,  self.config['TRUE_BOX_BUFFER'], 4))   # list of self.config['TRUE_self.config['BOX']_BUFFER'] GT boxes
         y_batch = np.zeros((r_bound - l_bound, self.config['GRID_H'],  self.config['GRID_W'], self.config['BOX'], 4+1+self.config['CLASS']))                # desired network output
@@ -166,7 +163,8 @@ class BatchGenerator(Sequence):
         for train_instance in self.images[l_bound:r_bound]:
             # augment input image and fix object's position and size
             img, all_objs = self.aug_image(train_instance, jitter=self.jitter)
-            
+	    if self.imgdepth == 1:
+		img = img[:,:,np.newaxis]
             # construct output from object's x, y, w, h
             true_box_index = 0
             
@@ -217,7 +215,7 @@ class BatchGenerator(Sequence):
                         true_box_index = true_box_index % self.config['TRUE_BOX_BUFFER']
                             
             # assign input image to x_batch
-            if self.norm != None: 
+            if self.norm != None:
                 x_batch[instance_count] = self.norm(img)
             else:
                 # plot image and bounding boxes for sanity check
@@ -236,7 +234,6 @@ class BatchGenerator(Sequence):
 
         self.counter += 1
         #print ' new batch created', self.counter
-
         return [x_batch, b_batch], y_batch
 
     def on_epoch_end(self):
@@ -244,10 +241,15 @@ class BatchGenerator(Sequence):
         self.counter = 0
 
     def aug_image(self, train_instance, jitter):
-        image_name = train_instance['filename']
-        image = cv2.imread(image_name)
-        h, w, c = image.shape
-        
+	image_name = train_instance['filename']
+	if self.imgdepth==3:
+		image = cv2.imread(image_name)
+		h, w, c = image.shape
+	if self.imgdepth==1:
+		image = cv2.imread(image_name,0)	
+		h, w = image.shape
+		c =1
+
         all_objs = copy.deepcopy(train_instance['object'])
 
         if jitter:
@@ -266,16 +268,15 @@ class BatchGenerator(Sequence):
             ### flip the image
             flip = np.random.binomial(1, .5)
             if flip > 0.5: image = cv2.flip(image, 1)
-                
             image = self.aug_pipe.augment_image(image)            
-            
         # resize the image to standard size
-        image = cv2.resize(image, (self.config['IMAGE_H'], self.config['IMAGE_W']))
-        image = image[:,:,::-1]
+	image = cv2.resize(image, (self.config['IMAGE_H'], self.config['IMAGE_W']))
+	if self.imgdepth == 3:
+		image = image[:,:,::-1]
 
-        # fix object's position and size
-        for obj in all_objs:
-            for attr in ['xmin', 'xmax']:
+        # fix objects's position and size
+	for obj in all_objs:
+	    for attr in ['xmin', 'xmax']:
                 if jitter: obj[attr] = int(obj[attr] * scale - offx)
                     
                 obj[attr] = int(obj[attr] * float(self.config['IMAGE_W']) / w)
