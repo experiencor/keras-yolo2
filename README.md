@@ -123,11 +123,17 @@ https://1drv.ms/f/s!ApLdDEW3ut5feoZAEUwmSMYdPlY
 
 These weights can be used as the pretrained weights for any one class object detectors.
 
-### 3. Start the training process
+### 3. Generate anchors for your dataset (optional)
+
+`python gen_anchors.py -c config.json`
+
+Copy the generated anchors printed on the terminal to the ```anchors``` setting in ```config.json```.
+
+### 4. Start the training process
 
 #### Warm up the network
 
-Set ```warmup_epochs``` in config.json to some number to 3 (emperically found, 4 or 5 is also fine).
+Set ```warmup_epochs``` in config.json to 3 (emperically found, 4 or 5 is also fine).
 
 `python train.py -c config.json`
 
@@ -139,7 +145,7 @@ Set ```warmup_epochs``` in config.json to 0.
 
 By the end of this process, the code will write the weights of the best model to file best_weights.h5 (or whatever name specified in the setting "saved_weights_name" in the config.json file). The training process stops when the loss on the validation set is not improved in 3 consecutive epoches.
 
-### 4. Perform detection using trained weights on an image by running
+### 5. Perform detection using trained weights on an image by running
 `python predict.py -c config.json -w /path/to/best_weights.h5 -i /path/to/image/or/video`
 
 It carries out detection on the image and write the image with detected bounding boxes to the same folder.
