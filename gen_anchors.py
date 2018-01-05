@@ -1,145 +1,140 @@
-from os import listdir
-from os.path import isfile, join
-import argparse
-import cv2
-import numpy as np
-import sys
-import os
-import shutil
 import random
-import math
 import argparse
-import os
 import numpy as np
 
 from preprocessing import parse_annotation
-from frontend import YOLO
 import json
-
-from utils import BoundBox, bbox_iou, get_feature_extractor
 
 argparser = argparse.ArgumentParser()
 
 argparser.add_argument(
     '-c',
     '--conf',
+    default='config.json',
     help='path to configuration file')
+
+argparser.add_argument(
+    '-a',
+    '--anchors',
+    default=5,
+    help='number of anchors to use')
 
 width_in_cfg_file = 416.
 height_in_cfg_file = 416.
 grid_h, grid_w = (13, 13)
 
-def IOU(x,centroids):
+def IOU(ann, centroids):
+    w, h = ann
     similarities = []
-    k = len(centroids)
+
     for centroid in centroids:
-        c_w,c_h = centroid
-        w,h = x
-        if c_w>=w and c_h>=h:
+        c_w, c_h = centroid
+
+        if c_w >= w and c_h >= h:
             similarity = w*h/(c_w*c_h)
-        elif c_w>=w and c_h<=h:
+        elif c_w >= w and c_h <= h:
             similarity = w*c_h/(w*h + (c_w-w)*c_h)
-        elif c_w<=w and c_h>=h:
+        elif c_w <= w and c_h >= h:
             similarity = c_w*h/(w*h + c_w*(c_h-h))
         else: #means both w,h are bigger than c_w and c_h respectively
             similarity = (c_w*c_h)/(w*h)
         similarities.append(similarity) # will become (k,) shape
+
     return np.array(similarities)
 
-def avg_IOU(X,centroids):
-    n,d = X.shape
+def avg_IOU(anns, centroids):
+    n,d = anns.shape
     sum = 0.
-    for i in range(X.shape[0]):
-        #note IOU() will return array which contains IoU for each centroid and X[i] // slightly ineffective, but I am too lazy
-        sum+= max(IOU(X[i],centroids))
+
+    for i in range(anns.shape[0]):
+        sum+= max(IOU(anns[i], centroids))
+
     return sum/n
 
-def write_anchors_to_file(centroids,X,anchor_file):
-    f = open(anchor_file,'w')
-
+def print_anchors(centroids):
     anchors = centroids.copy()
 
-    for i in range(anchors.shape[0]):
-        anchors[i][0]*=width_in_cfg_file/32./grid_w
-        anchors[i][1]*=height_in_cfg_file/32./grid_h
-
-    widths = anchors[:,0]
+    widths = anchors[:, 0]
     sorted_indices = np.argsort(widths)
 
-    r = "anchors: [ "
+    r = "anchors: ["
     for i in sorted_indices[:-1]:
-        r += '%0.10f,%0.10f,' % (anchors[i,0]/width_in_cfg_file,anchors[i,1]/width_in_cfg_file)
+        r += '%0.2f,%0.2f, ' % (anchors[i,0], anchors[i,1])
 
     #there should not be comma after last anchor, that's why
-    r += '%0.10f,%0.10f' % (anchors[sorted_indices[-1:],0]/width_in_cfg_file/1.,anchors[sorted_indices[-1:],1]/width_in_cfg_file/1.)
+    r += '%0.2f,%0.2f' % (anchors[sorted_indices[-1:],0], anchors[sorted_indices[-1:],1])
     r += "]"
 
     print r
-    print
 
-def kmeans(X,centroids,eps,anchor_file):
-
-    N = X.shape[0]
+def run_kmeans(ann_dims, anchor_num):
+    ann_num = ann_dims.shape[0]
     iterations = 0
-    k,dim = centroids.shape
-    prev_assignments = np.ones(N)*(-1)
-    iter = 0
-    old_D = np.zeros((N,k))
+    prev_assignments = np.ones(ann_num)*(-1)
+    iteration = 0
+    old_distances = np.zeros((ann_num, anchor_num))
+
+    indices = [random.randrange(ann_dims.shape[0]) for i in range(anchor_num)]
+    centroids = ann_dims[indices]
+    anchor_dim = ann_dims.shape[1]
 
     while True:
-        D = []
-        iter+=1
-        for i in range(N):
-            d = 1 - IOU(X[i],centroids)
-            D.append(d)
-        D = np.array(D) # D.shape = (N,k)
+        distances = []
+        iteration += 1
+        for i in range(ann_num):
+            d = 1 - IOU(ann_dims[i], centroids)
+            distances.append(d)
+        distances = np.array(distances) # distances.shape = (ann_num, anchor_num)
 
-        print "iter {}: dists = {}".format(iter,np.sum(np.abs(old_D-D)))
+        print "iteration {}: dists = {}".format(iteration, np.sum(np.abs(old_distances-distances)))
 
         #assign samples to centroids
-        assignments = np.argmin(D,axis=1)
+        assignments = np.argmin(distances,axis=1)
 
         if (assignments == prev_assignments).all() :
-            print "Centroids = ",centroids
-            write_anchors_to_file(centroids,X,anchor_file)
-            return
+            return centroids
 
         #calculate new centroids
-        centroid_sums=np.zeros((k,dim),np.float)
-        for i in range(N):
-            centroid_sums[assignments[i]]+=X[i]
-        for j in range(k):
+        centroid_sums=np.zeros((anchor_num, anchor_dim), np.float)
+        for i in range(ann_num):
+            centroid_sums[assignments[i]]+=ann_dims[i]
+        for j in range(anchor_num):
             centroids[j] = centroid_sums[j]/(np.sum(assignments==j))
 
         prev_assignments = assignments.copy()
-        old_D = D.copy()
+        old_distances = distances.copy()
 
 def main(argv):
     config_path = args.conf
+    num_anchors = args.anchors
 
     with open(config_path) as config_buffer:
         config = json.loads(config_buffer.read())
 
-    grid_h, grid_w = get_feature_extractor(config['model']['architecture'], config['model']['input_size']).get_output_shape()
-    width_in_cfg_file = int(config['model']['input_size'])
-    height_in_cfg_file = int(config['model']['input_size'])
-
     train_imgs, train_labels = parse_annotation(config['train']['train_annot_folder'],
                                                 config['train']['train_image_folder'],
                                                 config['model']['labels'])
+
+    grid_w = config['model']['input_size']/32
+    grid_h = config['model']['input_size']/32
+
+    # run k_mean to find the anchors
     annotation_dims = []
     for image in train_imgs:
-        i = image['object'][0]
-        w = (float(i['xmax']) - float(i['xmin']))
-        h = (float(i["ymax"]) - float(i['ymin']))
-        annotation_dims.append(map(float,(w,h)))
+        cell_w = image['width']/grid_w
+        cell_h = image['height']/grid_h
+
+        for obj in image['object']:
+            relative_w = (float(obj['xmax']) - float(obj['xmin']))/cell_w
+            relatice_h = (float(obj["ymax"]) - float(obj['ymin']))/cell_h
+            annotation_dims.append(map(float, (relative_w,relatice_h)))
     annotation_dims = np.array(annotation_dims)
 
-    eps = 0.00005
+    centroids = run_kmeans(annotation_dims, num_anchors)
 
-    indices = [ random.randrange(annotation_dims.shape[0]) for i in range(5)]
-    centroids = annotation_dims[indices]
-    kmeans(annotation_dims,centroids,eps,"f1")
+    # write anchors to file
+    print '\naverage IOU for', num_anchors, 'anchors:', '%0.2f' % avg_IOU(annotation_dims, centroids)
+    print_anchors(centroids)
 
 if __name__ == '__main__':
     args = argparser.parse_args()

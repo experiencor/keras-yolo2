@@ -87,16 +87,19 @@ def _main_(args):
         valid_imgs = train_imgs[train_valid_split:]
         train_imgs = train_imgs[:train_valid_split]
 
-    
-    overlap_labels = set(config['model']['labels']).intersection(set(train_labels.keys()))
+    if len(config['model']['labels']) > 0:
+        overlap_labels = set(config['model']['labels']).intersection(set(train_labels.keys()))
 
-    print 'Seen labels:\t', train_labels
-    print 'Given labels:\t', config['model']['labels']
-    print 'Overlap labels:\t', overlap_labels    
+        print 'Seen labels:\t', train_labels
+        print 'Given labels:\t', config['model']['labels']
+        print 'Overlap labels:\t', overlap_labels           
 
-    if len(overlap_labels) < len(config['model']['labels']):
-        print 'Some labels have no images! Please revise the list of labels in the config.json file!'
-        return
+        if len(overlap_labels) < len(config['model']['labels']):
+            print 'Some labels have no annotations! Please revise the list of labels in the config.json file!'
+            return
+    else:
+        print 'No labels are provided. Train on all seen labels.'
+        config['model']['labels'] = train_labels.keys()
         
     ###############################
     #   Construct the model 
