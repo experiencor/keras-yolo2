@@ -137,7 +137,11 @@ Set ```warmup_epochs``` in config.json to 3 (emperically found, 4 or 5 is also f
 
 `python train.py -c config.json`
 
+This process saves the trained weights to the file specified in ```saved_weights_name``` setting.
+
 #### Actual network training
+
+Set ```pretrained_weights``` setting in ```config.json``` to the warmup weights (whatever in ```saved_weights_name```).
 
 Set ```warmup_epochs``` in config.json to 0.
 
