@@ -231,9 +231,11 @@ class BatchGenerator(Sequence):
 
     def aug_image(self, train_instance, jitter):
         image_name = train_instance['filename']
-        image = cv2.imread(image_name)
+        image = cv2.imread(image_name + '.jpg')
+
+        if image is None: print 'Cannot find ', image_name
+
         h, w, c = image.shape
-        
         all_objs = copy.deepcopy(train_instance['object'])
 
         if jitter:

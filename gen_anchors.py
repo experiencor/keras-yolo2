@@ -19,10 +19,6 @@ argparser.add_argument(
     default=5,
     help='number of anchors to use')
 
-width_in_cfg_file = 416.
-height_in_cfg_file = 416.
-grid_h, grid_w = (13, 13)
-
 def IOU(ann, centroids):
     w, h = ann
     similarities = []
@@ -99,7 +95,7 @@ def run_kmeans(ann_dims, anchor_num):
         for i in range(ann_num):
             centroid_sums[assignments[i]]+=ann_dims[i]
         for j in range(anchor_num):
-            centroids[j] = centroid_sums[j]/(np.sum(assignments==j))
+            centroids[j] = centroid_sums[j]/(np.sum(assignments==j) + 1e-6)
 
         prev_assignments = assignments.copy()
         old_distances = distances.copy()
@@ -129,6 +125,8 @@ def main(argv):
             relatice_h = (float(obj["ymax"]) - float(obj['ymin']))/cell_h
             annotation_dims.append(map(float, (relative_w,relatice_h)))
     annotation_dims = np.array(annotation_dims)
+
+    print annotation_dims
 
     centroids = run_kmeans(annotation_dims, num_anchors)
 
