@@ -39,6 +39,14 @@ def _main_(args):
 
     with open(config_path) as config_buffer:    
         config = json.load(config_buffer)
+    
+     # Read first image and check the image depth.  
+    img_first = cv2.imread(image_path)
+    isgrey = np.all(img_first[:,:,0] == img_first[:,:,1]) and  np.all(img_first[:,:,0] == img_first[:,:,2])
+    if isgrey:
+        depth = 1
+    if isgrey == False:
+	depth = 3
 
     ###############################
     #   Make the model 
@@ -46,7 +54,8 @@ def _main_(args):
 
     yolo = YOLO(architecture        = config['model']['architecture'],
                 input_size          = config['model']['input_size'], 
-                labels              = config['model']['labels'], 
+                input_depth	    = depth,
+		labels              = config['model']['labels'], 
                 max_box_per_image   = config['model']['max_box_per_image'],
                 anchors             = config['model']['anchors'])
 
@@ -86,7 +95,10 @@ def _main_(args):
         video_reader.release()
         video_writer.release()  
     else:
-        image = cv2.imread(image_path)
+        if depth==3:
+		image = cv2.imread(image_path)
+	if depth==1:
+		image = cv2.imread(image_path,0)
         boxes = yolo.predict(image)
         image = draw_boxes(image, boxes, config['model']['labels'])
 
