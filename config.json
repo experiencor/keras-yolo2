@@ -1,35 +1,34 @@
 {
     "model" : {
         "architecture":         "Full Yolo",
-        "input_size":           416,
-        "anchors":              [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828],
-        "max_box_per_image":    10,        
-        "labels":               ["raccoon"]
+        "input_size":           1024,	
+        "anchors":              [0.698,0.698],
+        "max_box_per_image":    150,        
+        "labels":               ["box"]
     },
 
     "train": {
-        "train_image_folder":   "/home/andy/github/raccoon_dataset/images/",
-        "train_annot_folder":   "/home/andy/github/raccoon_dataset/annotations/",     
-          
+        "train_image_folder":   "/datasets/toxin/basic-yolo-keras/train_image/",
+        "train_annot_folder":   "/datasets/toxin/basic-yolo-keras/train_annot/",
         "train_times":          10,
-        "pretrained_weights":   "full_yolo_raccoon.h5",
-        "batch_size":           16,
+        "pretrained_weights":   "full_yolo_particle.h5",
+        "batch_size":           3,
         "learning_rate":        1e-4,
         "nb_epoch":             50,
-        "warmup_epochs":        3,
+        "warmup_epochs":        0,
 
         "object_scale":         5.0 ,
         "no_object_scale":      1.0,
         "coord_scale":          1.0,
         "class_scale":          1.0,
 
-        "saved_weights_name":   "full_yolo_raccoon.h5",
+        "saved_weights_name":   "full_yolo_particle.h5",
         "debug":                true
     },
 
     "valid": {
-        "valid_image_folder":   "",
-        "valid_annot_folder":   "",
+        "valid_image_folder":   "/datasets/toxin/basic-yolo-keras/valid_image/",
+        "valid_annot_folder":   "/datasets/toxin/basic-yolo-keras/valid_annot/",
 
         "valid_times":          1
     }
