@@ -68,7 +68,7 @@ class YOLO(object):
                         kernel_initializer='lecun_normal')(features)
         output = Reshape((self.grid_h, self.grid_w, self.nb_box, 4 + 1 + self.nb_class))(output)
         output = Lambda(lambda args: args[0])([output, self.true_boxes])
-
+	print "out",output.shape
         self.model = Model([input_image, self.true_boxes], output)
         
         # initialize the weights of the detection layer
@@ -242,14 +242,17 @@ class YOLO(object):
     def predict(self, image):
         image = cv2.resize(image, (self.input_size, self.input_size))
         image = self.feature_extractor.normalize(image)
-        if len(image.shape)==3:
-                input_image = image[:,:,::-1]
-        else:
-                input_image = image.reshape((image.shape[0],image.shape[1],1))
-        input_image = np.expand_dims(input_image, 0)
-        dummy_array = dummy_array = np.zeros((1,1,1,1,self.max_box_per_image,4))
+	if len(image.shape)==3:
+        	input_image = image[:,:,::-1]
+	else:
+		input_image = image
+		input_image = image.reshape((image.shape[0],image.shape[1],1))
+	input_image = np.expand_dims(input_image, 0)
+	dummy_array = dummy_array = np.zeros((1,1,1,1,self.max_box_per_image,4))
         netout = self.model.predict([input_image, dummy_array])[0]
         boxes  = self.decode_netout(netout)
+        
+        return boxes
 
     def bbox_iou(self, box1, box2):
         x1_min  = box1.x - box1.w/2
