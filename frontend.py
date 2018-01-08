@@ -242,15 +242,15 @@ class YOLO(object):
     def predict(self, image):
         image = cv2.resize(image, (self.input_size, self.input_size))
         image = self.feature_extractor.normalize(image)
-
-        input_image = image[:,:,::-1]
+        if len(image.shape)==3:
+                input_image = image[:,:,::-1]
+        else:
+                input_image = image
+                input_image = image.reshape((image.shape[0],image.shape[1],1))
         input_image = np.expand_dims(input_image, 0)
         dummy_array = dummy_array = np.zeros((1,1,1,1,self.max_box_per_image,4))
-
         netout = self.model.predict([input_image, dummy_array])[0]
         boxes  = self.decode_netout(netout)
-        
-        return boxes
 
     def bbox_iou(self, box1, box2):
         x1_min  = box1.x - box1.w/2
