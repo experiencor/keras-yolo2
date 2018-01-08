@@ -94,16 +94,16 @@ def _main_(args):
     
     overlap_labels = set(config['model']['labels']).intersection(set(train_labels.keys()))
 
-     # Read first image and check the image depth. Give a warning if image depth and depth given in annotation is different 
+    # Read first image and check the image depth. Give a warning if image depth and depth given in annotation is different 
     img_first = cv2.imread(train_imgs[0]['filename'])
     isgrey = np.all(img_first[:,:,0] == img_first[:,:,1]) and  np.all(img_first[:,:,0] == img_first[:,:,2])
     if isgrey and depth==3:
         print "Annotation image depth does not match actual image depth. Use actual image depth"
-        depth = 1
+	depth = 1
     if isgrey == False and depth == 1:
-        print "Annotation image depth does not match actual image depth. Use actual image depth"
+	print "Annotation image depth does not match actual image depth. Use actual image depth"
         depth = 3
-    
+   
     print 'Seen labels:\t', train_labels
     print 'Given labels:\t', config['model']['labels']
     print 'Overlap labels:\t', overlap_labels    
