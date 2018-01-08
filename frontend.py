@@ -245,7 +245,6 @@ class YOLO(object):
         if len(image.shape)==3:
                 input_image = image[:,:,::-1]
         else:
-                input_image = image
                 input_image = image.reshape((image.shape[0],image.shape[1],1))
         input_image = np.expand_dims(input_image, 0)
         dummy_array = dummy_array = np.zeros((1,1,1,1,self.max_box_per_image,4))
