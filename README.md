@@ -14,6 +14,7 @@ This repo contains the implementation of YOLOv2 in Keras with Tensorflow backend
 - [x] ResNet50 backend
 - [ ] Multiple-GPU training
 - [ ] Multiscale training
+- [ ] mAP Evaluation
 
 ## Some example applications (click for videos):
 
