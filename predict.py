@@ -40,8 +40,8 @@ def _main_(args):
     isdir = os.path.isdir(image_path)
 
     if isdir:
-        print os.listdir(image_path)[0]
-        image_path = os.listdir(image_path)[0]
+        print image_path+os.listdir(image_path)[0]
+        first_image_path = image_path + os.listdir(image_path)[0]
 
     with open(config_path) as config_buffer:    
         config = json.load(config_buffer)
