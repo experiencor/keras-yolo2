@@ -4,14 +4,15 @@ import argparse
 import os
 import cv2
 import numpy as np
+import BoxWriter as bwrite
 from tqdm import tqdm
 from preprocessing import parse_annotation
 from utils import draw_boxes
 from frontend import YOLO
 import json
 
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]=""
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 argparser = argparse.ArgumentParser(
     description='Train and validate YOLO_v2 model on any dataset')
@@ -33,21 +34,20 @@ argparser.add_argument(
 
 
 def _main_(args):
- 
-    config_path  = args.conf
+    config_path = args.conf
     weights_path = args.weights
-    image_path   = args.input
+    image_path = args.input
     isdir = os.path.isdir(image_path)
 
     if isdir:
         first_image_path = image_path + os.listdir(image_path)[0]
 
-    with open(config_path) as config_buffer:    
+    with open(config_path) as config_buffer:
         config = json.load(config_buffer)
-    
-     # Read (first) image and check the image depth.
+
+        # Read (first) image and check the image depth.
     img_first = cv2.imread(first_image_path)
-    isgrey = np.all(img_first[:,:,0] == img_first[:,:,1]) and  np.all(img_first[:,:,0] == img_first[:,:,2])
+    isgrey = np.all(img_first[:, :, 0] == img_first[:, :, 1]) and np.all(img_first[:, :, 0] == img_first[:, :, 2])
     if isgrey:
         depth = 1
     else:
@@ -57,9 +57,9 @@ def _main_(args):
     #   Make the model 
     ###############################
 
-    yolo = YOLO(architecture        = config['model']['architecture'],
-                input_size          = config['model']['input_size'], 
-                input_depth	    = depth,
+    yolo = YOLO(architecture=config['model']['architecture'],
+                input_size=config['model']['input_size'],
+                input_depth	= depth,
 		        labels              = config['model']['labels'],
                 max_box_per_image   = config['model']['max_box_per_image'],
                 anchors             = config['model']['anchors'])
@@ -104,20 +104,24 @@ def _main_(args):
             paths = os.listdir(image_path)
         else:
             paths = [image_path]
+
         for img_pth in paths:
             if isdir:
                 img_pth = image_path + img_pth
             if depth == 3:
                 image = cv2.imread(img_pth)
             if depth == 1:
-                image = cv2.imread(img_pth,0)
+                image = cv2.imread(img_pth ,0)
             boxes = yolo.predict(image)
             image = draw_boxes(image, boxes, config['model']['labels'])
 
             print len(boxes), 'boxes are found'
 
             cv2.imwrite(img_pth[:-4] + '_detected' + img_pth[-4:], image)
+            bwrite.write_box(img_pth[:-4] + '.box', image, boxes, boxes[0].w)
+
 
 if __name__ == '__main__':
     args = argparser.parse_args()
     _main_(args)
+
