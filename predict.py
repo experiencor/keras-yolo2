@@ -113,7 +113,7 @@ def _main_(args):
 
             if not os.path.exists(box_pth):
                 os.makedirs(box_pth)
-            box_pth = os.path.join(box_pth,os.path.basename(img_pth)[:-4].box)
+            box_pth = os.path.join(box_pth, os.path.basename(img_pth)[:-4]+".box")
             if depth == 3:
                 image = cv2.imread(img_pth)
             if depth == 1:
