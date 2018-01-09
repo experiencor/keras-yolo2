@@ -99,6 +99,10 @@ def _main_(args):
         video_reader.release()
         video_writer.release()  
     else:
+        if isdir:
+            paths = os.listdir(image_path)
+        else:
+            paths = (image_path)
         for image_path in os.listdir(image_path):
             if depth == 3:
                 image = cv2.imread(image_path)
