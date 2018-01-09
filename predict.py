@@ -102,6 +102,7 @@ def _main_(args):
     else:
         if isdir:
             paths = image_path+os.listdir(image_path)
+            print paths
         else:
             paths = [image_path]
         for image_path in paths:
