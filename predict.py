@@ -105,6 +105,7 @@ def _main_(args):
         else:
             paths = [image_path]
         for image_path in paths:
+            print image_path
             if depth == 3:
                 image = cv2.imread(image_path)
             if depth == 1:
