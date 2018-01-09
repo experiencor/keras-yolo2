@@ -38,6 +38,7 @@ def _main_(args):
     weights_path = args.weights
     image_path   = args.input
     isdir = os.path.isdir(image_path)
+    print isdir
     if isdir:
         image_path = os.listdir(image_path)[0]
 
