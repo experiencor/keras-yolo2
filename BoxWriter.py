@@ -5,9 +5,7 @@
 import csv
 import os
 def write_box(path, image, boxes,boxsize):
-    path = path + "box/"
-    if not os.path.exists(path):
-        os.makedirs(path)
+   
     with open(path, 'wb') as boxfile:
         boxwriter = csv.writer(boxfile, delimiter='\t',
                            quotechar='|', quoting=csv.QUOTE_NONE)
