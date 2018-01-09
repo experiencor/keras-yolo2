@@ -40,14 +40,13 @@ def _main_(args):
     isdir = os.path.isdir(image_path)
 
     if isdir:
-        print image_path+os.listdir(image_path)[0]
         first_image_path = image_path + os.listdir(image_path)[0]
 
     with open(config_path) as config_buffer:    
         config = json.load(config_buffer)
     
      # Read (first) image and check the image depth.
-    img_first = cv2.imread(image_path)
+    img_first = cv2.imread(first_image_path)
     isgrey = np.all(img_first[:,:,0] == img_first[:,:,1]) and  np.all(img_first[:,:,0] == img_first[:,:,2])
     if isgrey:
         depth = 1
@@ -102,7 +101,7 @@ def _main_(args):
         video_writer.release()  
     else:
         if isdir:
-            paths = os.listdir(image_path)
+            paths = image_path+os.listdir(image_path)
         else:
             paths = [image_path]
         for image_path in paths:
