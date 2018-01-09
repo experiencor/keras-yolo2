@@ -36,11 +36,11 @@ argparser.add_argument(
 def _main_(args):
     config_path = args.conf
     weights_path = args.weights
-    image_path = args.input
-    isdir = os.path.isdir(image_path)
+    input_path = args.input
+    isdir = os.path.isdir(input_path)
 
     if isdir:
-        first_image_path = image_path + os.listdir(image_path)[0]
+        first_image_path = input_path + os.listdir(input_path)[0]
 
     with open(config_path) as config_buffer:
         config = json.load(config_buffer)
@@ -75,10 +75,10 @@ def _main_(args):
     #   Predict bounding boxes 
     ###############################
 
-    if image_path[-4:] == '.mp4':
-        video_out = image_path[:-4] + '_detected' + image_path[-4:]
+    if input_path[-4:] == '.mp4':
+        video_out = input_path[:-4] + '_detected' + input_path[-4:]
 
-        video_reader = cv2.VideoCapture(image_path)
+        video_reader = cv2.VideoCapture(input_path)
 
         nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
         frame_h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -101,13 +101,19 @@ def _main_(args):
         video_writer.release()  
     else:
         if isdir:
-            paths = os.listdir(image_path)
+            paths = os.listdir(input_path)
+
+            paths = [os.path.join(input_path, s) for s in paths]
         else:
-            paths = [image_path]
+
+            paths = [input_path]
 
         for img_pth in paths:
-            if isdir:
-                img_pth = image_path + img_pth
+            box_pth = os.path.join(os.path.dirname(img_pth),"box")
+
+            if not os.path.exists(box_pth):
+                os.makedirs(box_pth)
+            box_pth = os.path.join(box_pth,os.path.basename(img_pth)[:-4].box)
             if depth == 3:
                 image = cv2.imread(img_pth)
             if depth == 1:
@@ -118,7 +124,7 @@ def _main_(args):
             print len(boxes), 'boxes are found'
 
             cv2.imwrite(img_pth[:-4] + '_detected' + img_pth[-4:], image)
-            bwrite.write_box(img_pth[:-4] + '.box', image, boxes, boxes[0].w)
+            bwrite.write_box(box_pth, image, boxes, boxes[0].w)
 
 
 if __name__ == '__main__':
