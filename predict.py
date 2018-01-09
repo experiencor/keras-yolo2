@@ -38,8 +38,9 @@ def _main_(args):
     weights_path = args.weights
     image_path   = args.input
     isdir = os.path.isdir(image_path)
-    print isdir
+
     if isdir:
+        print os.listdir(image_path)[0]
         image_path = os.listdir(image_path)[0]
 
     with open(config_path) as config_buffer:    
