@@ -9,7 +9,7 @@ def write_box(path, image, boxes,boxsize):
         boxwriter = csv.writer(boxfile, delimiter='\t',
                            quotechar='|', quoting=csv.QUOTE_NONE)
         for box in boxes:
-            x_ll = int(image.shape[1] - (box.x + boxsize / 2) * image.shape[1]) # lower left
-            y_ll = int((box.y + boxsize / 2) * image.shape[0]) # lower right
+            x_ll = int((box.x - boxsize / 2) * image.shape[1]) # lower left
+            y_ll = int(image.shape[0]-(box.y -boxsize / 2) * image.shape[0]) # lower right
             export_boxsize = int(boxsize * image.shape[1])
             boxwriter.writerow([x_ll,y_ll,export_boxsize,export_boxsize])
