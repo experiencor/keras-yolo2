@@ -11,4 +11,4 @@ def write_box(path, image, boxes,boxsize):
         for box in boxes:
             x_ll = int((box.x - boxsize / 2) * image.shape[1]) # lower left
             y_ll = int((box.y - boxsize / 2) * image.shape[0]) # lower right
-            boxwriter.writerow([x_ll,y_ll,boxsize,boxsize])
+            boxwriter.writerow([x_ll,y_ll,boxsize* image.shape[1],boxsize* image.shape[0]])
