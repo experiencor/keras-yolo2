@@ -8,7 +8,7 @@ def write_box(path, image, boxes,boxsize):
     with open(path, 'wb') as boxfile:
         boxwriter = csv.writer(boxfile, delimiter='\t',
                            quotechar='|', quoting=csv.QUOTE_NONE)
-        print "add offset"+((boxsize / 2)* image.shape[1])
+
         for box in boxes:
             x_ll = int((box.x - boxsize / 2) * image.shape[1]) # lower left
             y_ll = int(image.shape[0]-(box.y)*image.shape[0] ) # lower right
