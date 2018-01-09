@@ -101,22 +101,22 @@ def _main_(args):
         video_writer.release()  
     else:
         if isdir:
-            paths = image_path+os.listdir(image_path)
-            print paths
+            paths = os.listdir(image_path)
         else:
             paths = [image_path]
-        for image_path in paths:
-            print image_path
+        for img_pth in paths:
+            if isdir:
+                img_pth = image_path + img_pth
             if depth == 3:
-                image = cv2.imread(image_path)
+                image = cv2.imread(img_pth)
             if depth == 1:
-                image = cv2.imread(image_path,0)
+                image = cv2.imread(img_pth,0)
             boxes = yolo.predict(image)
             image = draw_boxes(image, boxes, config['model']['labels'])
 
             print len(boxes), 'boxes are found'
 
-            cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], image)
+            cv2.imwrite(img_pth[:-4] + '_detected' + img_pth[-4:], image)
 
 if __name__ == '__main__':
     args = argparser.parse_args()
