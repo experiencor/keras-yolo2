@@ -102,8 +102,8 @@ def _main_(args):
         if isdir:
             paths = os.listdir(image_path)
         else:
-            paths = (image_path)
-        for image_path in os.listdir(image_path):
+            paths = [image_path]
+        for image_path in paths:
             if depth == 3:
                 image = cv2.imread(image_path)
             if depth == 1:
