@@ -95,11 +95,7 @@ def run_kmeans(ann_dims, anchor_num):
         for i in range(ann_num):
             centroid_sums[assignments[i]]+=ann_dims[i]
         for j in range(anchor_num):
-<<<<<<< HEAD
             centroids[j] = centroid_sums[j]/(np.sum(assignments==j) + 1e-6)
-=======
-            centroids[j] = centroid_sums[j]/(np.sum(assignments==j))
->>>>>>> 4843db4a6c199941d8e4e57bdd86af7d33882c61
 
         prev_assignments = assignments.copy()
         old_distances = distances.copy()
