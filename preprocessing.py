@@ -266,13 +266,13 @@ class BatchGenerator(Sequence):
             for attr in ['xmin', 'xmax']:
                 if jitter: obj[attr] = int(obj[attr] * scale - offx)
                     
-                obj[attr] = int(obj[attr] * float(self.config['IMAGE_W']) / w)
+                obj[attr] = int(obj[attr] * float(self.config['IMAGE_W']) / train_instance['width'])
                 obj[attr] = max(min(obj[attr], self.config['IMAGE_W']), 0)
                 
             for attr in ['ymin', 'ymax']:
                 if jitter: obj[attr] = int(obj[attr] * scale - offy)
                     
-                obj[attr] = int(obj[attr] * float(self.config['IMAGE_H']) / h)
+                obj[attr] = int(obj[attr] * float(self.config['IMAGE_H']) / train_instance['height'])
                 obj[attr] = max(min(obj[attr], self.config['IMAGE_H']), 0)
 
             if jitter and flip > 0.5:
