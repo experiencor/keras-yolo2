@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
 import argparse
 import os
 import cv2
@@ -9,6 +10,8 @@ from preprocessing import parse_annotation
 from utils import draw_boxes
 from frontend import YOLO
 import json
+import os
+import os.path
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -54,45 +57,59 @@ def _main_(args):
     #   Load trained weights
     ###############################    
 
-    print weights_path
+    print (weights_path)
     yolo.load_weights(weights_path)
 
     ###############################
     #   Predict bounding boxes 
     ###############################
 
-    if image_path[-4:] == '.mp4':
-        video_out = image_path[:-4] + '_detected' + image_path[-4:]
+    ################## 
+    #A for loop for every item in [images] folder.. 
 
-        video_reader = cv2.VideoCapture(image_path)
+    for file in os.listdir(image_path): 
 
-        nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
-        frame_h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        frame_w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
+    #  Just Created another directory in output directory so input image and output image will be diffrentiated 
 
-        video_writer = cv2.VideoWriter(video_out,
-                               cv2.VideoWriter_fourcc(*'MPEG'), 
-                               50.0, 
-                               (frame_w, frame_h))
+        if (os.path.isfile(os.path.join(image_path,file))):
 
-        for i in tqdm(range(nb_frames)):
-            _, image = video_reader.read()
-            
-            boxes = yolo.predict(image)
-            image = draw_boxes(image, boxes, config['model']['labels'])
+            output_path = os.path.join(image_path,'output')                                             
+            if not os.path.exists(output_path):
+                os.mkdir(output_path)
 
-            video_writer.write(np.uint8(image))
+            if file[-4:] == '.mp4':
+                video_out = file[:-4] + '_detected' + file[-4:]
 
-        video_reader.release()
-        video_writer.release()  
-    else:
-        image = cv2.imread(image_path)
-        boxes = yolo.predict(image)
-        image = draw_boxes(image, boxes, config['model']['labels'])
+                video_reader = cv2.VideoCapture(os.path.join(image_path,file))
+                
+                nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
+                frame_h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                frame_w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
 
-        print len(boxes), 'boxes are found'
+                video_writer = cv2.VideoWriter(os.path.join(output_path,video_out),
+                                       cv2.VideoWriter_fourcc(*'MPEG'), 
+                                       50.0, 
+                                       (frame_w, frame_h))
 
-        cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], image)
+                for i in tqdm(range(nb_frames)):
+                    _, image = video_reader.read()
+                    
+                    boxes = yolo.predict(image)
+                    image = draw_boxes(image, boxes, config['model']['labels'])
+
+                    video_writer.write(np.uint8(image))
+
+                video_reader.release()
+                video_writer.release()  
+            else:
+                image = cv2.imread(os.path.join(image_path,file))                ### joined the file name with the path
+                boxes = yolo.predict(image)
+                image = draw_boxes(image, boxes, config['model']['labels'])
+
+                print (len(boxes), 'boxes are found')
+                
+                new_file_name = file[:-4] + '_detected' + file[-4:]  ####added new file name
+                cv2.imwrite(os.path.join(output_path, new_file_name),image)
 
 if __name__ == '__main__':
     args = argparser.parse_args()
