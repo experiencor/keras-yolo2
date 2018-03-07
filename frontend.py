@@ -5,6 +5,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import cv2
+from keras.utils import multi_gpu_model
 from keras.applications.mobilenet import MobileNet
 from keras.layers.merge import concatenate
 from keras.optimizers import SGD, Adam, RMSprop
@@ -18,8 +19,38 @@ class YOLO(object):
                        input_size, 
                        labels, 
                        max_box_per_image,
-                       anchors):
+                       anchors,
+                       n_gpu = 1):
 
+        if n_gpu > 1:
+            # Instantiate the base model (or "template" model).
+            # We recommend doing this with under a CPU device scope,
+            # so that the model's weights are hosted on CPU memory.
+            # Otherwise they may end up hosted on a GPU, which would
+            # complicate weight sharing.
+            with tf.device('/cpu:0'):
+                self.template_model = self._create_model(architecture, 
+                                                        input_size, 
+                                                        labels,
+                                                        max_box_per_image, 
+                                                        anchors)
+            # Replicates the model on N GPUs.
+            # This assumes that your machine has N available GPUs.
+            self.parallel_model = multi_gpu_model(self.template_model, gpus = n_gpu)
+        else:
+            # With one GPU (or with CPU) the models reference the same object 
+            # so we don't need to change the code below
+            self.template_model = self._create_model(architecture, 
+                                                    input_size, 
+                                                    labels,
+                                                    max_box_per_image, 
+                                                    anchors)
+            self.parallel_model = self.template_model
+
+    def _create_model(self, architecture, input_size, labels, max_box_per_image, anchors):
+        ##########################
+        # Make the model
+        ##########################
         self.input_size = input_size
         
         self.labels   = list(labels)
@@ -30,13 +61,9 @@ class YOLO(object):
 
         self.max_box_per_image = max_box_per_image
 
-        ##########################
-        # Make the model
-        ##########################
-
         # make the feature extractor layers
         input_image     = Input(shape=(self.input_size, self.input_size, 3))
-        self.true_boxes = Input(shape=(1, 1, 1, max_box_per_image , 4))  
+        self.true_boxes = Input(shape=(1, 1, 1, self.max_box_per_image , 4))  
 
         if architecture == 'Inception3':
             self.feature_extractor = Inception3Feature(self.input_size)  
@@ -68,10 +95,10 @@ class YOLO(object):
         output = Reshape((self.grid_h, self.grid_w, self.nb_box, 4 + 1 + self.nb_class))(output)
         output = Lambda(lambda args: args[0])([output, self.true_boxes])
 
-        self.model = Model([input_image, self.true_boxes], output)
+        model = Model([input_image, self.true_boxes], output)
         
         # initialize the weights of the detection layer
-        layer = self.model.layers[-4]
+        layer = model.layers[-4]
         weights = layer.get_weights()
 
         new_kernel = np.random.normal(size=weights[0].shape)/(self.grid_h*self.grid_w)
@@ -80,7 +107,9 @@ class YOLO(object):
         layer.set_weights([new_kernel, new_bias])
 
         # print a summary of the whole model
-        self.model.summary()
+        model.summary()
+
+        return(model)
 
     def custom_loss(self, y_true, y_pred):
         mask_shape = tf.shape(y_true)[:4]
@@ -236,7 +265,7 @@ class YOLO(object):
         return loss
 
     def load_weights(self, weight_path):
-        self.model.load_weights(weight_path)
+        self.template_model.load_weights(weight_path, by_name = True)
 
     def predict(self, image):
         image = cv2.resize(image, (self.input_size, self.input_size))
@@ -246,7 +275,8 @@ class YOLO(object):
         input_image = np.expand_dims(input_image, 0)
         dummy_array = dummy_array = np.zeros((1,1,1,1,self.max_box_per_image,4))
 
-        netout = self.model.predict([input_image, dummy_array])[0]
+        # the template_model and parallel_model share the same weights
+        netout = self.template_model.predict([input_image, dummy_array])[0]
         boxes  = self.decode_netout(netout)
         
         return boxes
@@ -382,7 +412,7 @@ class YOLO(object):
         ############################################
 
         optimizer = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-        self.model.compile(loss=self.custom_loss, optimizer=optimizer)
+        self.parallel_model.compile(loss=self.custom_loss, optimizer=optimizer)
 
         ############################################
         # Make train and validation generators
@@ -435,12 +465,14 @@ class YOLO(object):
         # Start the training process
         ############################################        
 
-        self.model.fit_generator(generator        = train_batch, 
-                                 steps_per_epoch  = len(train_batch) * train_times, 
-                                 epochs           = nb_epoch, 
-                                 verbose          = 1,
-                                 validation_data  = valid_batch,
-                                 validation_steps = len(valid_batch) * valid_times,
-                                 callbacks        = [early_stop, checkpoint, tensorboard], 
-                                 workers          = 3,
-                                 max_queue_size   = 8)
+        # This `fit` call will be distributed on the GPUs available
+        # The batch size will be split equally on the GPUs
+        self.parallel_model.fit_generator(generator        = train_batch, 
+                                    steps_per_epoch  = len(train_batch) * train_times, 
+                                    epochs           = nb_epoch, 
+                                    verbose          = 1,
+                                    validation_data  = valid_batch,
+                                    validation_steps = len(valid_batch) * valid_times,
+                                    callbacks        = [early_stop, checkpoint, tensorboard], 
+                                    workers          = 3,
+                                    max_queue_size   = 8)
