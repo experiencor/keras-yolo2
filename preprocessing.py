@@ -154,6 +154,8 @@ class BatchGenerator(Sequence):
         for train_instance in self.images[l_bound:r_bound]:
             # augment input image and fix object's position and size
             img, all_objs = self.aug_image(train_instance, jitter=self.jitter)
+            if img is None:
+                continue
             
             # construct output from object's x, y, w, h
             true_box_index = 0
@@ -233,7 +235,9 @@ class BatchGenerator(Sequence):
         image_name = train_instance['filename']
         image = cv2.imread(image_name)
 
-        if image is None: print 'Cannot find ', image_name
+        if image is None:
+            print 'Cannot find ', image_name
+            return None, None
 
         h, w, c = image.shape
         all_objs = copy.deepcopy(train_instance['object'])
