@@ -14,7 +14,7 @@ def parse_annotation(ann_dir, img_dir, labels=[]):
     
     for ann in sorted(os.listdir(ann_dir)):
         img = {'object':[]}
-        
+
         tree = ET.parse(ann_dir + ann)
         
         for elem in tree.iter():
@@ -222,7 +222,7 @@ class BatchGenerator(Sequence):
             # increase instance counter in current batch
             instance_count += 1  
 
-        #print ' new batch created', idx
+        #print(' new batch created', idx)
 
         return [x_batch, b_batch], y_batch
 
@@ -233,7 +233,7 @@ class BatchGenerator(Sequence):
         image_name = train_instance['filename']
         image = cv2.imread(image_name)
 
-        if image is None: print 'Cannot find ', image_name
+        if image is None: print('Cannot find ', image_name)
 
         h, w, c = image.shape
         all_objs = copy.deepcopy(train_instance['object'])
