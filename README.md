@@ -4,14 +4,9 @@ This repo contains the implementation of YOLOv2 in Keras with Tensorflow backend
 
 ## Todo list:
 - [x] Warmup training
-- [x] Raccoon detection
-- [x] Self-driving car
-- [x] Kangaroo detection
-- [x] SqueezeNet backend
-- [x] MobileNet backend
-- [x] InceptionV3 backend
-- [x] VGG16 backend
-- [x] ResNet50 backend
+- [x] Raccoon detection, Self-driving car, and Kangaroo detection
+- [x] SqueezeNet, MobileNet, InceptionV3, and ResNet50 backends
+- [x] Support python 2.7 and 3.6
 - [ ] Multiple-GPU training
 - [ ] Multiscale training
 - [ ] mAP Evaluation
@@ -131,20 +126,6 @@ These weights can be used as the pretrained weights for any one class object det
 Copy the generated anchors printed on the terminal to the ```anchors``` setting in ```config.json```.
 
 ### 4. Start the training process
-
-#### Warm up the network
-
-Set ```warmup_epochs``` in config.json to 3 (emperically found, 4 or 5 is also fine).
-
-`python train.py -c config.json`
-
-This process saves the trained weights to the file specified in ```saved_weights_name``` setting.
-
-#### Actual network training
-
-Set ```pretrained_weights``` setting in ```config.json``` to the warmup weights (whatever in ```saved_weights_name```).
-
-Set ```warmup_epochs``` in config.json to 0.
 
 `python train.py -c config.json`
 

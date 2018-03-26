@@ -24,7 +24,7 @@ class YOLO(object):
         
         self.labels   = list(labels)
         self.nb_class = len(self.labels)
-        self.nb_box   = len(anchors)/2
+        self.nb_box   = len(anchors)//2
         self.class_wt = np.ones(self.nb_class, dtype='float32')
         self.anchors  = anchors
 
@@ -55,7 +55,7 @@ class YOLO(object):
         else:
             raise Exception('Architecture not supported! Only support Full Yolo, Tiny Yolo, MobileNet, SqueezeNet, VGG16, ResNet50, and Inception3 at the moment!')
 
-        print self.feature_extractor.get_output_shape()    
+        print(self.feature_extractor.get_output_shape())    
         self.grid_h, self.grid_w = self.feature_extractor.get_output_shape()        
         features = self.feature_extractor.extract(input_image)            
 
@@ -69,6 +69,7 @@ class YOLO(object):
         output = Lambda(lambda args: args[0])([output, self.true_boxes])
 
         self.model = Model([input_image, self.true_boxes], output)
+
         
         # initialize the weights of the detection layer
         layer = self.model.layers[-4]
@@ -194,9 +195,11 @@ class YOLO(object):
         no_boxes_mask = tf.to_float(coord_mask < self.coord_scale/2.)
         seen = tf.assign_add(seen, 1.)
         
-        true_box_xy, true_box_wh, coord_mask = tf.cond(tf.less(seen, self.warmup_bs), 
+        true_box_xy, true_box_wh, coord_mask = tf.cond(tf.less(seen, self.warmup_batches+1), 
                               lambda: [true_box_xy + (0.5 + cell_grid) * no_boxes_mask, 
-                                       true_box_wh + tf.ones_like(true_box_wh) * np.reshape(self.anchors, [1,1,1,self.nb_box,2]) * no_boxes_mask, 
+                                       true_box_wh + tf.ones_like(true_box_wh) * \
+                                       np.reshape(self.anchors, [1,1,1,self.nb_box,2]) * \
+                                       no_boxes_mask, 
                                        tf.ones_like(coord_mask)],
                               lambda: [true_box_xy, 
                                        true_box_wh,
@@ -215,7 +218,9 @@ class YOLO(object):
         loss_class = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_box_class, logits=pred_box_class)
         loss_class = tf.reduce_sum(loss_class * class_mask) / (nb_class_box + 1e-6)
         
-        loss = loss_xy + loss_wh + loss_conf + loss_class
+        loss = tf.cond(tf.less(seen, self.warmup_batches+1), 
+                      lambda: loss_xy + loss_wh + loss_conf + loss_class + 10,
+                      lambda: loss_xy + loss_wh + loss_conf + loss_class)
         
         if self.debug:
             nb_true_box = tf.reduce_sum(y_true[..., 4])
@@ -320,13 +325,13 @@ class YOLO(object):
         for c in range(self.nb_class):
             sorted_indices = list(reversed(np.argsort([box.classes[c] for box in boxes])))
 
-            for i in xrange(len(sorted_indices)):
+            for i in range(len(sorted_indices)):
                 index_i = sorted_indices[i]
                 
                 if boxes[index_i].classes[c] == 0: 
                     continue
                 else:
-                    for j in xrange(i+1, len(sorted_indices)):
+                    for j in range(i+1, len(sorted_indices)):
                         index_j = sorted_indices[j]
                         
                         if self.bbox_iou(boxes[index_i], boxes[index_j]) >= nms_threshold:
@@ -354,7 +359,7 @@ class YOLO(object):
                     valid_imgs,     # the list of images used to validate the model
                     train_times,    # the number of time to repeat the training set, often used for small datasets
                     valid_times,    # the number of times to repeat the validation set, often used for small datasets
-                    nb_epoch,       # number of epoches
+                    nb_epochs,       # number of epoches
                     learning_rate,  # the learning rate
                     batch_size,     # the size of the batch
                     warmup_epochs,  # number of initial batches to let the model familiarize with the new dataset
@@ -366,7 +371,6 @@ class YOLO(object):
                     debug=False):     
 
         self.batch_size = batch_size
-        self.warmup_bs  = warmup_epochs * (train_times*(len(train_imgs)/batch_size+1) + valid_times*(len(valid_imgs)/batch_size+1))
 
         self.object_scale    = object_scale
         self.no_object_scale = no_object_scale
@@ -374,15 +378,6 @@ class YOLO(object):
         self.class_scale     = class_scale
 
         self.debug = debug
-
-        if warmup_epochs > 0: nb_epoch = warmup_epochs # if it's warmup stage, don't train more than warmup_epochs
-
-        ############################################
-        # Compile the model
-        ############################################
-
-        optimizer = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-        self.model.compile(loss=self.custom_loss, optimizer=optimizer)
 
         ############################################
         # Make train and validation generators
@@ -407,7 +402,16 @@ class YOLO(object):
         valid_batch = BatchGenerator(valid_imgs, 
                                      generator_config, 
                                      norm=self.feature_extractor.normalize,
-                                     jitter=False)
+                                     jitter=False)   
+                                     
+        self.warmup_batches  = warmup_epochs * (train_times*len(train_batch) + valid_times*len(valid_batch))   
+
+        ############################################
+        # Compile the model
+        ############################################
+
+        optimizer = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+        self.model.compile(loss=self.custom_loss, optimizer=optimizer)
 
         ############################################
         # Make a few callbacks
@@ -437,7 +441,7 @@ class YOLO(object):
 
         self.model.fit_generator(generator        = train_batch, 
                                  steps_per_epoch  = len(train_batch) * train_times, 
-                                 epochs           = nb_epoch, 
+                                 epochs           = warmup_epochs + nb_epochs, 
                                  verbose          = 1,
                                  validation_data  = valid_batch,
                                  validation_steps = len(valid_batch) * valid_times,
