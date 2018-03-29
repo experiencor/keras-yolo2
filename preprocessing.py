@@ -6,7 +6,7 @@ import imgaug as ia
 from imgaug import augmenters as iaa
 from keras.utils import Sequence
 import xml.etree.ElementTree as ET
-from utils import BoundBox, normalize, bbox_iou
+from utils import BoundBox, bbox_iou
 
 def parse_annotation(ann_dir, img_dir, labels=[]):
     all_imgs = []
@@ -137,6 +137,26 @@ class BatchGenerator(Sequence):
     def __len__(self):
         return int(np.ceil(float(len(self.images))/self.config['BATCH_SIZE']))   
 
+    def num_classes(self):
+        return len(self.config['LABELS'])
+
+    def size(self):
+        return len(self.images)    
+
+    def load_annotation(self, i):
+        annots = []
+
+        for obj in self.images[i]['object']:
+            annot = [obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'], self.config['LABELS'].index(obj['name'])]
+            annots += [annot]
+
+        if len(annots) == 0: annots = [[]]
+
+        return np.array(annots)
+
+    def load_image(self, i):
+        return cv2.imread(self.images[i]['filename'])
+
     def __getitem__(self, idx):
         l_bound = idx*self.config['BATCH_SIZE']
         r_bound = (idx+1)*self.config['BATCH_SIZE']
@@ -149,7 +169,7 @@ class BatchGenerator(Sequence):
 
         x_batch = np.zeros((r_bound - l_bound, self.config['IMAGE_H'], self.config['IMAGE_W'], 3))                         # input images
         b_batch = np.zeros((r_bound - l_bound, 1     , 1     , 1    ,  self.config['TRUE_BOX_BUFFER'], 4))   # list of self.config['TRUE_self.config['BOX']_BUFFER'] GT boxes
-        y_batch = np.zeros((r_bound - l_bound, self.config['GRID_H'],  self.config['GRID_W'], self.config['BOX'], 4+1+self.config['CLASS']))                # desired network output
+        y_batch = np.zeros((r_bound - l_bound, self.config['GRID_H'],  self.config['GRID_W'], self.config['BOX'], 4+1+len(self.config['LABELS'])))                # desired network output
 
         for train_instance in self.images[l_bound:r_bound]:
             # augment input image and fix object's position and size
@@ -181,8 +201,8 @@ class BatchGenerator(Sequence):
                         max_iou     = -1
                         
                         shifted_box = BoundBox(0, 
-                                               0, 
-                                               center_w, 
+                                               0,
+                                               center_w,                                                
                                                center_h)
                         
                         for i in range(len(self.anchors)):

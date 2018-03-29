@@ -32,7 +32,6 @@ argparser.add_argument(
     help='path to an image or an video (mp4 format)')
 
 def _main_(args):
- 
     config_path  = args.conf
     weights_path = args.weights
     image_path   = args.input
@@ -44,7 +43,7 @@ def _main_(args):
     #   Make the model 
     ###############################
 
-    yolo = YOLO(architecture        = config['model']['architecture'],
+    yolo = YOLO(backend             = config['model']['backend'],
                 input_size          = config['model']['input_size'], 
                 labels              = config['model']['labels'], 
                 max_box_per_image   = config['model']['max_box_per_image'],
@@ -54,7 +53,6 @@ def _main_(args):
     #   Load trained weights
     ###############################    
 
-    print(weights_path)
     yolo.load_weights(weights_path)
 
     ###############################
