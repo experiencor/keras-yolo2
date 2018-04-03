@@ -468,10 +468,4 @@ class YOLO(object):
         netout = self.model.predict([input_image, dummy_array])[0]
         boxes  = decode_netout(netout, self.anchors, self.nb_class)
 
-        for i in range(len(boxes)):
-            boxes[i].xmin = int(boxes[i].xmin*image_w)
-            boxes[i].ymin = int(boxes[i].ymin*image_h)
-            boxes[i].xmax = int(boxes[i].xmax*image_w)
-            boxes[i].ymax = int(boxes[i].ymax*image_h)
-
         return boxes
