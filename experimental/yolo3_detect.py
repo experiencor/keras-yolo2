@@ -421,7 +421,7 @@ def _main_(args):
     do_nms(boxes, nms_thresh)     
 
     # draw bounding boxes on the image using labels
-    draw_boxes(image, boxes, labels, obj_thresh)
+    draw_boxes(image, boxes, labels, obj_thresh) 
 
     # write the image with bounding boxes to file
     cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], (image).astype('uint8'))

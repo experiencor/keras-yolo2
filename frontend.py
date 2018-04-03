@@ -451,7 +451,7 @@ class YOLO(object):
             precision = true_positives / np.maximum(true_positives + false_positives, np.finfo(np.float64).eps)
 
             # compute average precision
-            average_precision  = compute_ap(recall, precision)
+            average_precision  = compute_ap(recall, precision) 
             average_precisions[label] = average_precision
 
         return average_precisions    
