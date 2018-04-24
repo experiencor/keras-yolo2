@@ -370,7 +370,7 @@ class YOLO(object):
 
         for i in range(generator.size()):
             raw_image = generator.load_image(i)
-            raw_height, raw_width, raw_channels = raw_img.shape
+            raw_height, raw_width, raw_channels = raw_image.shape
 
             # make the boxes and the labels
             pred_boxes  = self.predict(raw_image)
