@@ -57,6 +57,54 @@ def parse_annotation(ann_dir, img_dir, labels=[]):
                         
     return all_imgs, seen_labels
 
+
+def parse_annotation_csv(csv_file, labels):
+    
+    all_imgs = []
+    seen_labels = {}
+
+    all_imgs_indices = {}
+    count_indice = 0
+    with open(csv_file, "r") as annotations:
+        for i, line in enumerate(annotations):
+            try:
+                fname, xmin, ymin, xmax, ymax, obj_name = line.split(",")
+                image = cv2.imread(fname)
+                height, width, _ = image.shape
+
+                img = {'object':[]}
+                img['filename'] = fname
+                img['width'] = width
+                img['height'] = height
+
+                obj = {}
+                obj['xmin'] = int(xmin)
+                obj['xmax'] = int(xmax)
+                obj['ymin'] = int(ymin)
+                obj['ymax'] = int(ymax)
+                obj['name'] = obj_name
+
+                img['object'].append(obj)
+
+                if fname not in all_imgs_indices:
+                    all_imgs_indices[fname] = count_indice
+                    all_imgs.append(img)
+                    count_indice += 1
+                else:
+                    all_imgs[all_imgs_indices[fname]]['object'].append(obj)
+
+                if obj_name not in seen_labels:
+                    seen_labels[obj_name] = 1
+                else:
+                    seen_labels[obj_name] += 1
+
+            except:
+                print("Exception occured at line {}".format(i))
+                raise
+
+    return all_imgs, seen_labels
+
+
 class BatchGenerator(Sequence):
     def __init__(self, images, 
                        config, 
