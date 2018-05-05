@@ -45,17 +45,19 @@ def _main_(args):
     elif config['parser_annotation_type'] == 'csv':
         # parse annotations of the training set
         train_imgs, train_labels = parse_annotation_csv(config['train']['train_csv_file'],
-                                                        config['model']['labels'])
+                                                        config['model']['labels'],
+                                                        config['train']['train_csv_base_path'])
 
         # parse annotations of the validation set, if any, otherwise split the training set
         if os.path.exists(config['valid']['valid_csv_file']):
-            valid_imgs, valid_labels = parse_annotation_csv(config['train']['valid_csv_file'],
-                                                        config['model']['labels'])
+            valid_imgs, valid_labels = parse_annotation_csv(config['valid']['valid_csv_file'],
+                                                        config['model']['labels'],
+                                                        config['valid']['valid_csv_base_path'])
             split = False
         else:
             split = True
     else:
-        raise ValueError("'parser_annotations_type' must be 'xml' or 'csv'")
+        raise ValueError("'parser_annotations_type' must be 'xml' or 'csv' not {}.".format(config['parser_annotations_type']))
 
     
     if split:
@@ -78,6 +80,9 @@ def _main_(args):
     else:
         print('No labels are provided. Train on all seen labels.')
         config['model']['labels'] = train_labels.keys()
+        with open("labels.txt", 'w') as outfile:
+            #save all seen labels for future use (predict for example)
+            outfile.write(str(list(train_labels.keys())))
         
     ###############################
     #   Construct the model 

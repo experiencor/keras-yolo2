@@ -58,8 +58,9 @@ def parse_annotation(ann_dir, img_dir, labels=[]):
     return all_imgs, seen_labels
 
 
-def parse_annotation_csv(csv_file, labels):
+def parse_annotation_csv(csv_file, labels = [], base_path = ""):
     
+    print("parsing {} csv file can took a while, wait please.".format(csv_file))
     all_imgs = []
     seen_labels = {}
 
@@ -68,7 +69,10 @@ def parse_annotation_csv(csv_file, labels):
     with open(csv_file, "r") as annotations:
         for i, line in enumerate(annotations):
             try:
+                line = line.replace("\n","") #remove \n from the end in the line.
                 fname, xmin, ymin, xmax, ymax, obj_name = line.split(",")
+                fname = os.path.join(base_path, fname)
+                
                 image = cv2.imread(fname)
                 height, width, _ = image.shape
 
@@ -84,7 +88,10 @@ def parse_annotation_csv(csv_file, labels):
                 obj['ymax'] = int(ymax)
                 obj['name'] = obj_name
 
-                img['object'].append(obj)
+                if len(labels) > 0 and obj_name not in labels:
+                    continue
+                else:
+                    img['object'].append(obj)
 
                 if fname not in all_imgs_indices:
                     all_imgs_indices[fname] = count_indice
@@ -99,9 +106,8 @@ def parse_annotation_csv(csv_file, labels):
                     seen_labels[obj_name] += 1
 
             except:
-                print("Exception occured at line {}".format(i))
+                print("Exception occured at line {} from {}".format(i, csv_file))
                 raise
-
     return all_imgs, seen_labels
 
 

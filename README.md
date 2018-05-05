@@ -42,7 +42,7 @@ Dataset => http://cvrr.ucsd.edu/vivachallenge/index.php/hands/hand-detection/
 
 ### 0. Requirement
 
-python 2.7
+python 2.7 or python 3.x
 
 keras >= 2.0.8
 
