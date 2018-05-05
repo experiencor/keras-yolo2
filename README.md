@@ -155,6 +155,8 @@ It carries out detection on the image and write the image with detected bounding
  ```
     image.jpg,121,201,302,509,dog
  ```
+
+ ``` train_csv_base_path``` is a base path for your directory that contains the images in the csv file, and not the base path for your CSV file, it is usefull to keep just the relative path in the csv file
 ## Usage for jupyter notebook
 
 Refer to the notebook (https://github.com/experiencor/basic-yolo-keras/blob/master/Yolo%20Step-by-Step.ipynb) for a complete walk-through implementation of YOLOv2 from scratch (training, testing, and scoring).

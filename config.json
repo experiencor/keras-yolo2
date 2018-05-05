@@ -7,15 +7,19 @@
         "labels":               []
     },
 
+    "parser_annotation_type":    "csv",
 
     "train": {
+        "train_csv_file":       "train.txt",
         "train_csv_base_path":   "",
         "train_image_folder":   "D:/Repositorios/raccoon_dataset/images/",
         "train_annot_folder":   "D:/Repositorios/raccoon_dataset/annotations/",     
           
         "train_times":          8,
         "pretrained_weights":   "",
+        "batch_size":           4,
         "learning_rate":        1e-4,
+        "nb_epochs":            1,
         "warmup_epochs":        3,
 
         "object_scale":         5.0 ,
@@ -28,6 +32,7 @@
     },
 
     "valid": {
+        "valid_csv_file":       "val.txt",
         "valid_csv_base_path":  "",
         "valid_image_folder":   "",
         "valid_annot_folder":   "",
