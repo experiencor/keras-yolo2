@@ -31,6 +31,31 @@ argparser.add_argument(
     '--input',
     help='path to an image or an video (mp4 format)')
 
+#these funcition are from imutils, you can check this library here: https://github.com/jrosebr1/imutils
+#just added this function to have less dependencies
+def list_images(basePath, validExts=(".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"), contains=None):
+    # return the set of files that are valid
+    return list_files(basePath, validExts, contains=contains)
+
+def list_files(basePath, validExts=(""), contains=None):
+    # loop over the directory structure
+    for (rootDir, dirNames, filenames) in os.walk(basePath):
+        # loop over the filenames in the current directory
+        for filename in filenames:
+            # if the contains string is not none and the filename does not contain
+            # the supplied string, then ignore the file
+            if contains is not None and filename.find(contains) == -1:
+                continue
+
+            # determine the file extension of the current file
+            ext = filename[filename.rfind("."):].lower()
+
+            # check to see if the file is an image and should be processed
+            if ext.endswith(validExts):
+                # construct the path to the image and yield it
+                imagePath = os.path.join(rootDir, filename)
+                yield imagePath
+
 def _main_(args):
     config_path  = args.conf
     weights_path = args.weights
@@ -83,13 +108,25 @@ def _main_(args):
         video_reader.release()
         video_writer.release()  
     else:
-        image = cv2.imread(image_path)
-        boxes = yolo.predict(image)
-        image = draw_boxes(image, boxes, config['model']['labels'])
+        if os.path.isfile(image_path):
+            image = cv2.imread(image_path)
+            boxes = yolo.predict(image)
+            image = draw_boxes(image, boxes, config['model']['labels'])
 
-        print(len(boxes), 'boxes are found')
+            print(len(boxes), 'boxes are found')
 
-        cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], image)
+            cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], image)
+        else:
+            detected_images_path = os.path.join(image_path, "detected")
+            if not os.path.exists(detected_images_path):
+                os.mkdir(detected_images_path)
+            images = list(list_images(image_path))
+            for fname in tqdm(images):
+                image = cv2.imread(fname)
+                boxes = yolo.predict(image)
+                image = draw_boxes(image, boxes, config['model']['labels'])
+                fname = os.path.basename(fname)
+                cv2.imwrite(os.path.join(image_path, "detected", fname), image)
 
 if __name__ == '__main__':
     args = argparser.parse_args()
