@@ -80,9 +80,8 @@ def _main_(args):
     else:
         print('No labels are provided. Train on all seen labels.')
         config['model']['labels'] = train_labels.keys()
-        with open("labels.txt", 'w') as outfile:
-            #save all seen labels for future use (predict for example)
-            outfile.write(str(list(train_labels.keys())))
+        with open("labels.json", 'w') as outfile:
+            json.dump({"labels" : list(train_labels.keys())},outfile)
         
     ###############################
     #   Construct the model 
