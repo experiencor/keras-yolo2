@@ -17,7 +17,8 @@ argparser.add_argument(
     '-a',
     '--anchors',
     default=5,
-    help='number of anchors to use')
+    help='number of anchors to use',
+    type=int)
 
 def IOU(ann, centroids):
     w, h = ann
