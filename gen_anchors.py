@@ -2,7 +2,7 @@ import random
 import argparse
 import numpy as np
 
-from preprocessing import parse_annotation
+from preprocessing import parse_annotation, parse_annotation_csv
 import json
 
 argparser = argparse.ArgumentParser()
@@ -107,9 +107,17 @@ def main(argv):
     with open(config_path) as config_buffer:
         config = json.loads(config_buffer.read())
 
-    train_imgs, train_labels = parse_annotation(config['train']['train_annot_folder'],
-                                                config['train']['train_image_folder'],
-                                                config['model']['labels'])
+    if config['parser_annotation_type'] == 'xml':
+        # parse annotations of the training set
+        train_imgs, train_labels = parse_annotation(config['train']['train_annot_folder'], 
+                                                    config['train']['train_image_folder'], 
+                                                    config['model']['labels'])
+    elif config['parser_annotation_type'] == 'csv':
+        # parse annotations of the training set
+        train_imgs, train_labels = parse_annotation_csv(config['train']['train_csv_file'],
+                                                        config['model']['labels'],
+                                                        config['train']['train_csv_base_path'])
+
 
     grid_w = config['model']['input_size']/32
     grid_h = config['model']['input_size']/32
