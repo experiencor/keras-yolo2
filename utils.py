@@ -1,9 +1,12 @@
+from backend import (TinyYoloFeature, FullYoloFeature, MobileNetFeature, SqueezeNetFeature, 
+                    Inception3Feature, VGG16Feature, ResNet50Feature, BaseFeatureExtractor)
 import numpy as np
 import os
 import xml.etree.ElementTree as ET
 import tensorflow as tf
 import copy
 import cv2
+import sys
 
 class BoundBox:
     def __init__(self, xmin, ymin, xmax, ymax, c = None, classes = None):
@@ -206,3 +209,41 @@ def _softmax(x, axis=-1, t=-100.):
     e_x = np.exp(x)
     
     return e_x / e_x.sum(axis, keepdims=True)
+
+def import_dynamically(name):
+    components = name.split('.')
+    mod = __import__(components[0])
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    return mod
+
+def import_feature_extractor(backend, input_size):
+    if backend == 'Inception3':
+        feature_extractor = Inception3Feature(input_size)  
+    elif backend == 'SqueezeNet':
+        feature_extractor = SqueezeNetFeature(input_size)        
+    elif backend == 'MobileNet':
+        feature_extractor = MobileNetFeature(input_size)
+    elif backend == 'Full Yolo':
+        feature_extractor = FullYoloFeature(input_size)
+    elif backend == 'Tiny Yolo':
+        feature_extractor = TinyYoloFeature(input_size)
+    elif backend == 'VGG16':
+        feature_extractor = VGG16Feature(input_size)
+    elif backend == 'ResNet50':
+        feature_extractor = ResNet50Feature(input_size)
+    elif os.path.dirname(backend) != "":
+        basePath = os.path.dirname(backend)
+        sys.path.append(basePath)
+        custom_backend_name = os.path.basename(backend)
+        custom_backend = import_dynamically(custom_backend_name)
+        feature_extractor = custom_backend(input_size)
+        if not issubclass(custom_backend,BaseFeatureExtractor):
+            raise RuntimeError('You are trying to import a custom backend, your backend must'
+            ' be in inherited from "backend.BaseFeatureExtractor".')
+        print('Using a custom backend called {}.'.format(custom_backend_name))
+    else:
+        raise RuntimeError('Architecture not supported! Only support Full Yolo, Tiny Yolo, MobileNet,' 
+            'SqueezeNet, VGG16, ResNet50, or Inception3 at the moment!')
+
+    return feature_extractor

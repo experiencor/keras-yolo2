@@ -19,7 +19,7 @@ def parse_annotation(ann_dir, img_dir, labels=[]):
         
         for elem in tree.iter():
             if 'filename' in elem.tag:
-                img['filename'] = img_dir + elem.text
+                img['filename'] = os.path.join(img_dir, elem.text)
             if 'width' in elem.tag:
                 img['width'] = int(elem.text)
             if 'height' in elem.tag:
