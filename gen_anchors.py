@@ -102,7 +102,7 @@ def run_kmeans(ann_dims, anchor_num):
 
 def main(argv):
     config_path = args.conf
-    num_anchors = args.anchors
+    num_anchors = int(args.anchors)
 
     with open(config_path) as config_buffer:
         config = json.loads(config_buffer.read())
