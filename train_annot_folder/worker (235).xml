@@ -1,0 +1,26 @@
+<annotation>
+	<folder>dataset_images</folder>
+	<filename>worker (235).jpg</filename>
+	<path>D:\Workspace\YOLO_annotation\dataset_images\worker (235).jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>177</width>
+		<height>285</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>person</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>9</xmin>
+			<ymin>55</ymin>
+			<xmax>176</xmax>
+			<ymax>267</ymax>
+		</bndbox>
+	</object>
+</annotation>
