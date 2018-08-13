@@ -1,0 +1,38 @@
+<annotation>
+	<folder>all_images_folder</folder>
+	<filename>worker (739).jpg</filename>
+	<path>C:\Users\nasir.shah\Desktop\all_images_folder\all_images_folder\worker (739).jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>276</width>
+		<height>182</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>220</xmin>
+			<ymin>43</ymin>
+			<xmax>239</xmax>
+			<ymax>65</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person with helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>208</xmin>
+			<ymin>43</ymin>
+			<xmax>252</xmax>
+			<ymax>157</ymax>
+		</bndbox>
+	</object>
+</annotation>

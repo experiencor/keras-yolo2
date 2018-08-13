@@ -1,7 +1,7 @@
 <annotation>
-	<folder>dataset_images</folder>
+	<folder>all_images_folder</folder>
 	<filename>worker (362).jpg</filename>
-	<path>D:\Workspace\YOLO_annotation\dataset_images\worker (362).jpg</path>
+	<path>D:\dataset\all_images_folder\worker (362).jpg</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -17,10 +17,22 @@
 		<truncated>1</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>103</xmin>
-			<ymin>99</ymin>
+			<xmin>107</xmin>
+			<ymin>104</ymin>
 			<xmax>194</xmax>
-			<ymax>211</ymax>
+			<ymax>202</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person with helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>68</xmin>
+			<ymin>105</ymin>
+			<xmax>194</xmax>
+			<ymax>258</ymax>
 		</bndbox>
 	</object>
 	<object>
@@ -29,58 +41,22 @@
 		<truncated>1</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>1</xmin>
-			<ymin>29</ymin>
-			<xmax>25</xmax>
-			<ymax>65</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>helmet</name>
-		<pose>Unspecified</pose>
-		<truncated>1</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>1</xmin>
-			<ymin>72</ymin>
-			<xmax>41</xmax>
-			<ymax>141</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>person</name>
-		<pose>Unspecified</pose>
-		<truncated>1</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>53</xmin>
+			<xmin>81</xmin>
 			<ymin>1</ymin>
-			<xmax>155</xmax>
-			<ymax>220</ymax>
+			<xmax>129</xmax>
+			<ymax>27</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>person</name>
+		<name>person with helmet</name>
 		<pose>Unspecified</pose>
 		<truncated>1</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>64</xmin>
-			<ymin>94</ymin>
-			<xmax>194</xmax>
-			<ymax>259</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>person</name>
-		<pose>Unspecified</pose>
-		<truncated>1</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>1</xmin>
-			<ymin>72</ymin>
-			<xmax>83</xmax>
-			<ymax>246</ymax>
+			<xmin>56</xmin>
+			<ymin>1</ymin>
+			<xmax>154</xmax>
+			<ymax>107</ymax>
 		</bndbox>
 	</object>
 </annotation>

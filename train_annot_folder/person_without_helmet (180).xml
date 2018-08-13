@@ -1,0 +1,38 @@
+<annotation>
+	<folder>person_without_helmet</folder>
+	<filename>person_without_helmet (180).jpg</filename>
+	<path>C:\Users\nasir.shah\Desktop\person_without_helmet\person_without_helmet (180).jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>220</width>
+		<height>200</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>92</xmin>
+			<ymin>10</ymin>
+			<xmax>125</xmax>
+			<ymax>26</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person with helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>79</xmin>
+			<ymin>11</ymin>
+			<xmax>153</xmax>
+			<ymax>100</ymax>
+		</bndbox>
+	</object>
+</annotation>

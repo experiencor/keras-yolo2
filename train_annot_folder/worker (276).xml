@@ -1,7 +1,7 @@
 <annotation>
-	<folder>dataset_images</folder>
+	<folder>all_images_folder</folder>
 	<filename>worker (276).jpg</filename>
-	<path>D:\Workspace\YOLO_annotation\dataset_images\worker (276).jpg</path>
+	<path>D:\dataset\all_images_folder\worker (276).jpg</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -17,9 +17,9 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>98</xmin>
+			<xmin>100</xmin>
 			<ymin>67</ymin>
-			<xmax>119</xmax>
+			<xmax>117</xmax>
 			<ymax>81</ymax>
 		</bndbox>
 	</object>
@@ -29,34 +29,34 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>125</xmin>
-			<ymin>58</ymin>
-			<xmax>143</xmax>
-			<ymax>72</ymax>
+			<xmin>126</xmin>
+			<ymin>59</ymin>
+			<xmax>141</xmax>
+			<ymax>70</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>person</name>
+		<name>person with helmet</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>118</xmin>
-			<ymin>58</ymin>
-			<xmax>177</xmax>
-			<ymax>145</ymax>
+			<xmin>87</xmin>
+			<ymin>68</ymin>
+			<xmax>123</xmax>
+			<ymax>155</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>person</name>
+		<name>person with helmet</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>85</xmin>
-			<ymin>67</ymin>
-			<xmax>131</xmax>
-			<ymax>164</ymax>
+			<xmin>120</xmin>
+			<ymin>57</ymin>
+			<xmax>164</xmax>
+			<ymax>142</ymax>
 		</bndbox>
 	</object>
 </annotation>

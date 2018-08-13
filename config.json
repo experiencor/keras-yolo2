@@ -4,7 +4,7 @@
         "input_size":           416,
         "anchors":              [1.57,1.77, 2.80,8.62, 3.60,3.36, 5.51,10.50, 9.22,11.30],
         "max_box_per_image":    10,        
-        "labels":               ["person","helmet"]
+        "labels":               ["helmet","person with helmet","person without helmet"]
     },
 
     "train": {
@@ -13,10 +13,10 @@
           
         "train_times":          10,
         "pretrained_weights":   "",
-        "batch_size":           16,
+        "batch_size":           2,
         "learning_rate":        1e-4,
         "nb_epochs":            50,
-        "warmup_epochs":        3,
+        "warmup_epochs":        0,
 
         "object_scale":         5.0 ,
         "no_object_scale":      1.0,

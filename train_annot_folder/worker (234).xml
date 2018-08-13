@@ -1,7 +1,7 @@
 <annotation>
-	<folder>dataset_images</folder>
+	<folder>all_images_folder</folder>
 	<filename>worker (234).jpg</filename>
-	<path>D:\Workspace\YOLO_annotation\dataset_images\worker (234).jpg</path>
+	<path>D:\dataset\all_images_folder\worker (234).jpg</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -17,69 +17,69 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>131</xmin>
-			<ymin>8</ymin>
-			<xmax>228</xmax>
-			<ymax>76</ymax>
+			<xmin>139</xmin>
+			<ymin>14</ymin>
+			<xmax>218</xmax>
+			<ymax>69</ymax>
 		</bndbox>
 	</object>
 	<object>
 		<name>helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>83</xmin>
+			<ymin>63</ymin>
+			<xmax>142</xmax>
+			<ymax>106</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>25</xmin>
+			<ymin>33</ymin>
+			<xmax>72</xmax>
+			<ymax>76</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person with helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>17</xmin>
+			<ymin>34</ymin>
+			<xmax>80</xmax>
+			<ymax>183</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person with helmet</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
 			<xmin>81</xmin>
-			<ymin>60</ymin>
-			<xmax>148</xmax>
-			<ymax>113</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>helmet</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>23</xmin>
-			<ymin>28</ymin>
-			<xmax>75</xmax>
-			<ymax>72</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>person</name>
-		<pose>Unspecified</pose>
-		<truncated>1</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>135</xmin>
-			<ymin>10</ymin>
-			<xmax>275</xmax>
-			<ymax>182</ymax>
-		</bndbox>
-	</object>
-	<object>
-		<name>person</name>
-		<pose>Unspecified</pose>
-		<truncated>1</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>85</xmin>
 			<ymin>62</ymin>
-			<xmax>170</xmax>
-			<ymax>183</ymax>
+			<xmax>165</xmax>
+			<ymax>177</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>person</name>
+		<name>person with helmet</name>
 		<pose>Unspecified</pose>
 		<truncated>1</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>8</xmin>
-			<ymin>32</ymin>
-			<xmax>90</xmax>
+			<xmin>139</xmin>
+			<ymin>12</ymin>
+			<xmax>244</xmax>
 			<ymax>183</ymax>
 		</bndbox>
 	</object>
