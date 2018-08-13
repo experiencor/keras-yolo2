@@ -1,0 +1,74 @@
+<annotation>
+	<folder>non_workers</folder>
+	<filename>applauding_132.jpg</filename>
+	<path>D:\Workspace\YOLO_annotation\dataset_images\non_workers\applauding_132.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>448</width>
+		<height>300</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>person without helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>2</xmin>
+			<ymin>63</ymin>
+			<xmax>81</xmax>
+			<ymax>293</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person without helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>77</xmin>
+			<ymin>70</ymin>
+			<xmax>189</xmax>
+			<ymax>300</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person without helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>320</xmin>
+			<ymin>60</ymin>
+			<xmax>403</xmax>
+			<ymax>297</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person without helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>393</xmin>
+			<ymin>62</ymin>
+			<xmax>448</xmax>
+			<ymax>275</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person without helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>197</xmin>
+			<ymin>73</ymin>
+			<xmax>304</xmax>
+			<ymax>300</ymax>
+		</bndbox>
+	</object>
+</annotation>

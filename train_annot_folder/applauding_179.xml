@@ -1,0 +1,26 @@
+<annotation>
+	<folder>non_workers</folder>
+	<filename>applauding_179.jpg</filename>
+	<path>D:\Workspace\YOLO_annotation\dataset_images\non_workers\applauding_179.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>300</width>
+		<height>352</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>person without helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>42</xmin>
+			<ymin>29</ymin>
+			<xmax>265</xmax>
+			<ymax>352</ymax>
+		</bndbox>
+	</object>
+</annotation>
