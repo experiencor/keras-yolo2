@@ -75,12 +75,14 @@ def _main_(args):
         frame_w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
 
         video_writer = cv2.VideoWriter(video_out,
-                               cv2.VideoWriter_fourcc(*'MPEG'), 
-                               50.0, 
-                               (frame_w, frame_h))
+                               cv2.VideoWriter_fourcc(*'mp4v'), 
+                               30.0, 
+                               (frame_h, frame_w),True) #(frame_w, frame_h) # Virando video
 
         for i in tqdm(range(nb_frames)):
             _, image = video_reader.read()
+            image = np.rot90(image,3)
+            image = image.copy() # Fix Bug np.rot90
             
             boxes = yolo.predict(image)
             #image = draw_boxes(image, boxes, config['model']['labels'], 20, 3.5, -90)
