@@ -9,6 +9,7 @@ from preprocessing import parse_annotation
 from utils import draw_boxes
 from frontend import YOLO
 import json
+import xml.etree.ElementTree as ET
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -30,6 +31,12 @@ argparser.add_argument(
     '-i',
     '--input',
     help='path to an image or an video (mp4 format)')
+
+argparser.add_argument(
+    '-a',
+    '--annotFile',
+    help='annotation File')   
+  
 
 def _main_(args):
     config_path  = args.conf
@@ -85,6 +92,34 @@ def _main_(args):
         video_writer.release()  
     else:
         image = cv2.imread(image_path)
+
+        if (args.annotFile != None):
+            boxes_ann = []
+            tree = ET.parse(args.annotFile)
+            for elem in tree.iter():
+                if 'object' in elem.tag or 'part' in elem.tag:
+                    obj = {}
+                    
+                    for attr in list(elem):
+                        if 'name' in attr.tag:
+                            obj['name'] = attr.text
+
+                            boxes_ann.append(obj)
+                                
+                        if 'bndbox' in attr.tag:
+                            for dim in list(attr):
+                                if 'xmin' in dim.tag:
+                                    obj['xmin'] = int(round(float(dim.text)))
+                                if 'ymin' in dim.tag:
+                                    obj['ymin'] = int(round(float(dim.text)))
+                                if 'xmax' in dim.tag:
+                                    obj['xmax'] = int(round(float(dim.text)))
+                                if 'ymax' in dim.tag:
+                                    obj['ymax'] = int(round(float(dim.text)))
+            
+            for box in boxes_ann:
+                cv2.rectangle(image, (box['xmin'],box['ymin']), (box['xmax'],box['ymax']), (255,0,0), 30)
+
         boxes = yolo.predict(image)
         image = draw_boxes(image, boxes, config['model']['labels'], 30, 4.5, 35)
 
