@@ -76,7 +76,8 @@ def _main_(args):
             _, image = video_reader.read()
             
             boxes = yolo.predict(image)
-            image = draw_boxes(image, boxes, config['model']['labels'])
+            #image = draw_boxes(image, boxes, config['model']['labels'], 20, 3.5, -90)
+            image = draw_boxes(image, boxes, config['model']['labels'], 2, 1.1, -30)
 
             video_writer.write(np.uint8(image))
 
@@ -85,7 +86,7 @@ def _main_(args):
     else:
         image = cv2.imread(image_path)
         boxes = yolo.predict(image)
-        image = draw_boxes(image, boxes, config['model']['labels'])
+        image = draw_boxes(image, boxes, config['model']['labels'], 30, 4.5, 35)
 
         print(len(boxes), 'boxes are found')
 

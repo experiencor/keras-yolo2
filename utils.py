@@ -56,23 +56,45 @@ def bbox_iou(box1, box2):
     
     return float(intersect) / union
 
-def draw_boxes(image, boxes, labels):
+def draw_boxes(image, boxes, labels, thickness=3, fonte=None, position=13):
     image_h, image_w, _ = image.shape
 
+    colors = []
+    colors.append((0,0,255))
+    colors.append((0,255,0))
+    colors.append((255,0,0))
+    colors.append((0,255,255))
+    colors.append((255,0,255))
+    colors.append((255,255,0))
+
     for box in boxes:
+        # if box.get_label()==1:
+        #     continue
+
+        cor = colors[box.get_label()]
+
         xmin = int(box.xmin*image_w)
         ymin = int(box.ymin*image_h)
         xmax = int(box.xmax*image_w)
         ymax = int(box.ymax*image_h)
 
-        cv2.rectangle(image, (xmin,ymin), (xmax,ymax), (0,255,0), 3)
+        if fonte==None:
+            fonte = int(1e-3 * image_h)
+
+        cv2.rectangle(image, (xmin,ymin), (xmax,ymax), cor, thickness)
         cv2.putText(image, 
-                    labels[box.get_label()] + ' ' + str(box.get_score()), 
-                    (xmin, ymin - 13), 
+                    labels[box.get_label()] , 
+                    (xmin, ymin - position), 
                     cv2.FONT_HERSHEY_SIMPLEX, 
-                    1e-3 * image_h, 
-                    (0,255,0), 2)
-        
+                    fonte, 
+                    cor, int(thickness))
+        cv2.putText(image, 
+                    str(box.get_score()), 
+                    (xmin, ymin - (position*2)), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 
+                    fonte, 
+                    cor, int(thickness))
+
     return image          
         
 def decode_netout(netout, anchors, nb_class, obj_threshold=0.3, nms_threshold=0.3):
