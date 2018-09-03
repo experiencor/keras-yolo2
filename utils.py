@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import tensorflow as tf
 import copy
 import cv2
+from scipy.special import expit
 
 class BoundBox:
     def __init__(self, xmin, ymin, xmax, ymax, c = None, classes = None):
@@ -195,7 +196,8 @@ def _interval_overlap(interval_a, interval_b):
             return min(x2,x4) - x3          
 
 def _sigmoid(x):
-    return 1. / (1. + np.exp(-x))
+    return expit(x)
+    #return 1. / (1. + np.exp(-x))
 
 def _softmax(x, axis=-1, t=-100.):
     x = x - np.max(x)
