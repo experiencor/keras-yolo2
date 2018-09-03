@@ -315,7 +315,7 @@ class YOLO(object):
                                      save_best_only=True, 
                                      mode='min', 
                                      period=1)
-        tensorboard = TensorBoard(log_dir=os.path.expanduser('~/logs/'), 
+        tensorboard = TensorBoard(log_dir=os.path.expanduser('./logs/'), 
                                   histogram_freq=0, 
                                   #write_batch_performance=True,
                                   write_graph=True, 
