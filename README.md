@@ -1,4 +1,4 @@
-# YOLOv2 in Keras and Applications
+# Helmet Detection using YOLOv2 in Keras
 
 This repo contains the implementation of YOLOv2 in Keras with Tensorflow backend. It supports training YOLOv2 network with various backends such as MobileNet and InceptionV3.
 
