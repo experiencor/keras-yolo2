@@ -21,7 +21,13 @@ imgaug
 
 ### 1. Data preparation
 
+#### Dataset Collection
+The dataset containing images of people wearing helmets and people without helmets were collected mostly from google search. Some images have people applauding, those were collected from [Stanford 40 Action Dataset](http://vision.stanford.edu/Datasets/40actions.html).
 
+#### Annotations
+Annotaion of each image was done in Pascal VOC format using the awesome lightweight annotation tool [LabelImg](https://github.com/tzutalin/labelImg) for object-detection
+
+#### Organizing the dataset
 Organize the dataset into 4 folders:
 
 + train_image_folder <= the folder that contains the train images.
