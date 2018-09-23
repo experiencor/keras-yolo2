@@ -86,7 +86,7 @@ The model section defines the type of the model to construct as well as other pa
 
 Download pretrained weights for backend (tiny yolo, full yolo, squeezenet, mobilenet, and inceptionV3) at:
 
-https://1drv.ms/f/s!ApLdDEW3ut5fec2OzK4S4RpT-SU
+https://drive.google.com/file/d/1gpOX-lfvyP70Pi2G77RIGzCBMHqO5Gic/view?usp=sharing
 
 **These weights must be put in the root folder of the repository. They are the pretrained weights for the backend only and will be loaded during model creation. The code does not work without these weights.**
 
