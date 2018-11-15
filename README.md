@@ -1,56 +1,33 @@
-# YOLOv2 in Keras and Applications
+# Helmet Detection using YOLOv2 in Keras
 
-This repo contains the implementation of YOLOv2 in Keras with Tensorflow backend. It supports training YOLOv2 network with various backends such as MobileNet and InceptionV3. Links to demo applications are shown below. Check out https://experiencor.github.io/yolo_demo/demo.html for a Raccoon Detector demo run entirely in brower with DeepLearn.js and MobileNet backend (it somehow breaks in Window). Source code of this demo is located at https://git.io/vF7vG.
+This repo contains the implementation of YOLOv2 in Keras with Tensorflow backend. It supports training YOLOv2 network with various backends such as MobileNet and InceptionV3.
 
-## Todo list:
-- [x] Warmup training
-- [x] Raccoon detection, Self-driving car, and Kangaroo detection
-- [x] SqueezeNet, MobileNet, InceptionV3, and ResNet50 backends
-- [x] Support python 2.7 and 3.6
-- [ ] Multiple-GPU training
-- [ ] Multiscale training
-- [ ] mAP Evaluation
 
-## Some example applications (click for videos):
+## My application:
 
-### Raccon detection
-<a href="https://www.youtube.com/watch?v=aibuvj2-zxA" rel="some text"><p align="center"><img src="https://i.imgur.com/6okeDjz.jpg" height="300"></p></a>
+### Helmet detection
+![Helmet and people wearing helmets](./helmet_detection.gif "Helmet Detection")
 
-Dataset => https://github.com/experiencor/raccoon_dataset
-
-### Kangaroo detection
-<a href="https://youtu.be/vjmFzEP1qZw?t=34" rel="some text"><p align="center"><img src="https://i.imgur.com/v606VZX.jpg" height="300"></p></a>
-
-Dataset => https://github.com/experiencor/kangaroo
-
-### Self-driving Car
-<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center"><img src="https://i.imgur.com/kEc9ptL.jpg" height="300"></p></a>
-
-Dataset => http://cocodataset.org/#detections-challenge2017
-
-### Red blod cell detection
-<a href="https://www.youtube.com/watch?v=oYCaILZxEWM" rel="some text"><p align="center"><img src="https://i.imgur.com/1vmIJKL.jpg" height="300"></p></a>
-
-Dataset => https://github.com/cosmicad/dataset
-
-### Hand detection
-<a href="https://www.youtube.com/watch?v=p3-3kN_fIz0" rel="some text"><p align="center"><img src="https://i.imgur.com/75imQQz.jpg" height="300"></p></a>
-
-Dataset => http://cvrr.ucsd.edu/vivachallenge/index.php/hands/hand-detection/
 
 ## Usage for python code
 
 ### 0. Requirement
 
-python 2.7
+python 2.7 or 3.x
 
 keras >= 2.0.8
 
 imgaug
 
 ### 1. Data preparation
-Download the Raccoon dataset from from https://github.com/experiencor/raccoon_dataset.
 
+#### Dataset Collection
+The dataset containing images of people wearing helmets and people without helmets were collected mostly from google search. Some images have people applauding, those were collected from [Stanford 40 Action Dataset](http://vision.stanford.edu/Datasets/40actions.html).
+
+#### Annotations
+Annotaion of each image was done in Pascal VOC format using the awesome lightweight annotation tool [LabelImg](https://github.com/tzutalin/labelImg) for object-detection
+
+#### Organizing the dataset
 Organize the dataset into 4 folders:
 
 + train_image_folder <= the folder that contains the train images.
@@ -73,12 +50,12 @@ The configuration file is a json file, which looks like this:
         "input_size":           416,
         "anchors":              [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828],
         "max_box_per_image":    10,        
-        "labels":               ["raccoon"]
+        "labels":               ["helmet", "person with helmet", "person without helmet"]
     },
 
     "train": {
-        "train_image_folder":   "/home/andy/data/raccoon_dataset/images/",
-        "train_annot_folder":   "/home/andy/data/raccoon_dataset/anns/",      
+        "train_image_folder":   "/train_image_folder/",
+        "train_annot_folder":   "/train_annot_folder/",      
           
         "train_times":          10,             # the number of time to cycle through the training set, useful for small datasets
         "pretrained_weights":   "",             # specify the path of the pretrained weights, but it's fine to start from scratch
@@ -109,15 +86,10 @@ The model section defines the type of the model to construct as well as other pa
 
 Download pretrained weights for backend (tiny yolo, full yolo, squeezenet, mobilenet, and inceptionV3) at:
 
-https://1drv.ms/f/s!ApLdDEW3ut5fec2OzK4S4RpT-SU
+https://drive.google.com/file/d/1gpOX-lfvyP70Pi2G77RIGzCBMHqO5Gic/view?usp=sharing
 
 **These weights must be put in the root folder of the repository. They are the pretrained weights for the backend only and will be loaded during model creation. The code does not work without these weights.**
 
-The link to the pretrained weights for the whole model (both frontend and backend) of the raccoon detector can be downloaded at:
-
-https://1drv.ms/f/s!ApLdDEW3ut5feoZAEUwmSMYdPlY
-
-These weights can be used as the pretrained weights for any one class object detectors.
 
 ### 3. Generate anchors for your dataset (optional)
 

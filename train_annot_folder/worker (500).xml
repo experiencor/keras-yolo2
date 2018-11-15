@@ -1,0 +1,38 @@
+<annotation>
+	<folder>train_image_folder</folder>
+	<filename>worker (500).jpg</filename>
+	<path>D:\Workspace\YOLO_annotation\dataset_images\tagged\train_image_folder\worker (500).jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>275</width>
+		<height>183</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>137</xmin>
+			<ymin>5</ymin>
+			<xmax>192</xmax>
+			<ymax>43</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person with helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>107</xmin>
+			<ymin>6</ymin>
+			<xmax>227</xmax>
+			<ymax>181</ymax>
+		</bndbox>
+	</object>
+</annotation>

@@ -1,0 +1,14 @@
+<annotation>
+	<folder>dataset_images</folder>
+	<filename>worker (184).jpg</filename>
+	<path>D:\Workspace\YOLO_annotation\dataset_images\worker (184).jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>288</width>
+		<height>175</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+</annotation>

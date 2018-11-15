@@ -1,0 +1,26 @@
+<annotation>
+	<folder>all_images_folder</folder>
+	<filename>worker (281).jpg</filename>
+	<path>D:\dataset\all_images_folder\worker (281).jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>262</width>
+		<height>192</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>person without helmet</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>116</xmin>
+			<ymin>8</ymin>
+			<xmax>246</xmax>
+			<ymax>176</ymax>
+		</bndbox>
+	</object>
+</annotation>

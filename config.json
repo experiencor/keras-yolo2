@@ -2,28 +2,28 @@
     "model" : {
         "backend":              "Full Yolo",
         "input_size":           416,
-        "anchors":              [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828],
+        "anchors":              [1.57,1.77, 2.80,8.62, 3.60,3.36, 5.51,10.50, 9.22,11.30],
         "max_box_per_image":    10,        
-        "labels":               ["kangaroo"]
+        "labels":               ["helmet","person with helmet","person without helmet"]
     },
 
     "train": {
-        "train_image_folder":   "/home/andy/data/kangaroo/images/",
-        "train_annot_folder":   "/home/andy/data/kangaroo/annots/",     
+        "train_image_folder":   "train_image_folder\\",
+        "train_annot_folder":   "train_annot_folder\\",     
           
-        "train_times":          8,
-        "pretrained_weights":   "full_yolo_kangaroo3.h5",
-        "batch_size":           16,
+        "train_times":          10,
+        "pretrained_weights":   "",
+        "batch_size":           2,
         "learning_rate":        1e-4,
-        "nb_epochs":            1,
-        "warmup_epochs":        3,
+        "nb_epochs":            50,
+        "warmup_epochs":        0,
 
         "object_scale":         5.0 ,
         "no_object_scale":      1.0,
         "coord_scale":          1.0,
         "class_scale":          1.0,
 
-        "saved_weights_name":   "full_yolo_kangaroo.h5",
+        "saved_weights_name":   "full_yolo_helmet_and_person.h5",
         "debug":                true
     },
 
