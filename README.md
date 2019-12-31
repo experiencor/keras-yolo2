@@ -109,13 +109,13 @@ The model section defines the type of the model to construct as well as other pa
 
 Download pretrained weights for backend (tiny yolo, full yolo, squeezenet, mobilenet, and inceptionV3) at:
 
-https://1drv.ms/f/s!ApLdDEW3ut5fec2OzK4S4RpT-SU
+https://drive.google.com/drive/folders/10oym4eL2RxJa0gro26vzXK__TtYOP5Ng
 
 **These weights must be put in the root folder of the repository. They are the pretrained weights for the backend only and will be loaded during model creation. The code does not work without these weights.**
 
 The link to the pretrained weights for the whole model (both frontend and backend) of the raccoon detector can be downloaded at:
 
-https://1drv.ms/f/s!ApLdDEW3ut5feoZAEUwmSMYdPlY
+https://drive.google.com/drive/folders/10oym4eL2RxJa0gro26vzXK__TtYOP5Ng
 
 These weights can be used as the pretrained weights for any one class object detectors.
 
