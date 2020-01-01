@@ -278,7 +278,7 @@ class BatchGenerator(Sequence):
             image = self.aug_pipe.augment_image(image)            
             
         # resize the image to standard size
-        image = cv2.resize(image, (self.config['IMAGE_H'], self.config['IMAGE_W']))
+        image = cv2.resize(image, (self.config['IMAGE_W'], self.config['IMAGE_H']))
         image = image[:,:,::-1]
 
         # fix object's position and size
