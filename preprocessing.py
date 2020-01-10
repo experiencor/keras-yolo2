@@ -248,7 +248,7 @@ class BatchGenerator(Sequence):
 
     def on_epoch_end(self):
         if self.shuffle: np.random.shuffle(self.images)
-
+            
     def aug_image(self, train_instance, jitter):
         image_name = train_instance['filename']
         image = cv2.imread(image_name)
@@ -259,45 +259,34 @@ class BatchGenerator(Sequence):
         all_objs = copy.deepcopy(train_instance['object'])
 
         if jitter:
-            ### scale the image
-            scale = np.random.uniform() / 10. + 1.
-            image = cv2.resize(image, (0,0), fx = scale, fy = scale)
+            # augment image and get new bbs
+            bbs = ia.BoundingBoxesOnImage([
+                ia.BoundingBox(x1=int(obj["xmin"]), y1=int(obj["ymin"]), x2=int(obj["xmax"]), y2=int(obj["ymax"])) for obj in all_objs
+            ], shape=image.shape)
 
-            ### translate the image
-            max_offx = (scale-1.) * w
-            max_offy = (scale-1.) * h
-            offx = int(np.random.uniform() * max_offx)
-            offy = int(np.random.uniform() * max_offy)
-            
-            image = image[offy : (offy + h), offx : (offx + w)]
+            seq_det     = self.aug_pipe.to_deterministic()    
+            image       = seq_det.augment_image(image)
+            bbs_aug     = seq_det.augment_bounding_boxes([bbs])[0]
+            #bbs_aug     = bbs_aug.remove_out_of_image().cut_out_of_image()          
 
-            ### flip the image
-            flip = np.random.binomial(1, .5)
-            if flip > 0.5: image = cv2.flip(image, 1)
+            for i, bbs in enumerate(bbs_aug.bounding_boxes):
+                all_objs[i]["xmin"] = bbs.x1
+                all_objs[i]["ymin"] = bbs.y1
+                all_objs[i]["xmax"] = bbs.x2
+                all_objs[i]["ymax"] = bbs.y2
                 
-            image = self.aug_pipe.augment_image(image)            
-            
         # resize the image to standard size
         image = cv2.resize(image, (self.config['IMAGE_H'], self.config['IMAGE_W']))
         image = image[:,:,::-1]
 
-        # fix object's position and size
+        #fix object's position and size
         for obj in all_objs:
-            for attr in ['xmin', 'xmax']:
-                if jitter: obj[attr] = int(obj[attr] * scale - offx)
-                    
+            for attr in ['xmin', 'xmax']: 
                 obj[attr] = int(obj[attr] * float(self.config['IMAGE_W']) / w)
                 obj[attr] = max(min(obj[attr], self.config['IMAGE_W']), 0)
                 
             for attr in ['ymin', 'ymax']:
-                if jitter: obj[attr] = int(obj[attr] * scale - offy)
-                    
                 obj[attr] = int(obj[attr] * float(self.config['IMAGE_H']) / h)
                 obj[attr] = max(min(obj[attr], self.config['IMAGE_H']), 0)
 
-            if jitter and flip > 0.5:
-                xmin = obj['xmin']
-                obj['xmin'] = self.config['IMAGE_W'] - obj['xmax']
-                obj['xmax'] = self.config['IMAGE_W'] - xmin
-                
         return image, all_objs
