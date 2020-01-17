@@ -9,6 +9,7 @@ from preprocessing import parse_annotation
 from utils import draw_boxes
 from frontend import YOLO
 import json
+import glob
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -83,13 +84,20 @@ def _main_(args):
         video_reader.release()
         video_writer.release()  
     else:
-        image = cv2.imread(image_path)
-        boxes = yolo.predict(image)
-        image = draw_boxes(image, boxes, config['model']['labels'])
+        for fnamee in glob.glob(image_path+"*.jpg"):
+            cache=fnamee.split("/")[0]
+            fname=fnamee.split("/")[-1]
+            
+            
+            
+            image = cv2.imread(fnamee)
+            boxes = yolo.predict(image)
+            image = draw_boxes(image, boxes, config['model']['labels'])
 
-        print(len(boxes), 'boxes are found')
-
-        cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], image)
+            print(len(boxes), 'boxes are found')
+            
+            
+            cv2.imwrite(cache+"/"+fname[:-4] + '_detected' + fname[-4:], image)
 
 if __name__ == '__main__':
     args = argparser.parse_args()
