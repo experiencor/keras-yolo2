@@ -1,9 +1,15 @@
+import os
+import sys
+
+sys.path.insert(0, '../mean_average_precision')
+from mean_average_precision.detection_map import DetectionMAP
+import matplotlib.pyplot as plt
+
 from keras.models import Model
 from keras.layers import Reshape, Activation, Conv2D, Input, MaxPooling2D, BatchNormalization, Flatten, Dense, Lambda
 from keras.layers.advanced_activations import LeakyReLU
 import tensorflow as tf
 import numpy as np
-import os
 import cv2
 from utils import decode_netout, compute_overlap, compute_ap
 from keras.applications.mobilenet import MobileNet
@@ -12,6 +18,9 @@ from keras.optimizers import SGD, Adam, RMSprop
 from preprocessing import BatchGenerator
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from backend import TinyYoloFeature, FullYoloFeature, MobileNetFeature, SqueezeNetFeature, Inception3Feature, VGG16Feature, ResNet50Feature
+import time
+
+import statistics
 
 class YOLO(object):
     def __init__(self, backend,
@@ -242,19 +251,14 @@ class YOLO(object):
     def load_weights(self, weight_path):
         self.model.load_weights(weight_path)
 
-    def train(self, train_imgs,     # the list of images to train the model
-                    valid_imgs,     # the list of images used to validate the model
-                    train_times,    # the number of time to repeat the training set, often used for small datasets
-                    valid_times,    # the number of times to repeat the validation set, often used for small datasets
-                    nb_epochs,      # number of epoches
+    def eval(self, valid_imgs,     # the list of images to train the model
+                    test_imgs,     # the list of images used to validate the model
                     learning_rate,  # the learning rate
                     batch_size,     # the size of the batch
-                    warmup_epochs,  # number of initial batches to let the model familiarize with the new dataset
                     object_scale,
                     no_object_scale,
                     coord_scale,
                     class_scale,
-                    saved_weights_name='best_weights.h5',
                     debug=False):     
 
         self.batch_size = batch_size
@@ -283,15 +287,17 @@ class YOLO(object):
             'TRUE_BOX_BUFFER' : self.max_box_per_image,
         }    
 
-        train_generator = BatchGenerator(train_imgs, 
-                                     generator_config, 
-                                     norm=self.feature_extractor.normalize)
         valid_generator = BatchGenerator(valid_imgs, 
                                      generator_config, 
                                      norm=self.feature_extractor.normalize,
                                      jitter=False)   
-                                     
-        self.warmup_batches  = warmup_epochs * (train_times*len(train_generator) + valid_times*len(valid_generator))   
+
+        test_generator = BatchGenerator(test_imgs, 
+                                     generator_config, 
+                                     norm=self.feature_extractor.normalize,
+                                     jitter=False)   
+
+        self.warmup_batches  = 0
 
         ############################################
         # Compile the model
@@ -304,46 +310,75 @@ class YOLO(object):
         # Make a few callbacks
         ############################################
 
-        early_stop = EarlyStopping(monitor='val_loss', 
-                           min_delta=0.001, 
-                           patience=3, 
-                           mode='min', 
-                           verbose=1)
-        checkpoint = ModelCheckpoint(saved_weights_name, 
-                                     monitor='val_loss', 
-                                     verbose=1, 
-                                     save_best_only=True, 
-                                     mode='min', 
-                                     period=1)
-        tensorboard = TensorBoard(log_dir=os.path.expanduser('./logs/'), 
-                                  histogram_freq=0, 
-                                  #write_batch_performance=True,
-                                  write_graph=True, 
-                                  write_images=False)
+        # early_stop = EarlyStopping(monitor='val_loss', 
+        #                    min_delta=0.0001, 
+        #                    patience=5, 
+        #                    mode='min', 
+        #                    verbose=1)
+        # checkpoint = ModelCheckpoint(saved_weights_name, 
+        #                              monitor='val_loss', 
+        #                              verbose=1, 
+        #                              save_best_only=True, 
+        #                              mode='min', 
+        #                              period=1)
+        # tensorboard = TensorBoard(log_dir=os.path.expanduser('./logs/'), 
+        #                           histogram_freq=0, 
+        #                           #write_batch_performance=True,
+        #                           write_graph=True, 
+        #                           write_images=False)
 
         ############################################
         # Start the training process
         ############################################        
 
-        self.model.fit_generator(generator        = train_generator, 
-                                 steps_per_epoch  = len(train_generator) * train_times, 
-                                 epochs           = warmup_epochs + nb_epochs, 
-                                 verbose          = 2 if debug else 1,
-                                 validation_data  = valid_generator,
-                                 validation_steps = len(valid_generator) * valid_times,
-                                 callbacks        = [early_stop, checkpoint, tensorboard], 
-                                 workers          = 3,
-                                 max_queue_size   = 8)      
+        # self.model.fit_generator(generator        = train_generator, 
+        #                          steps_per_epoch  = len(train_generator) * train_times, 
+        #                          epochs           = warmup_epochs + nb_epochs, 
+        #                          verbose          = 2 if debug else 1,
+        #                          validation_data  = valid_generator,
+        #                          validation_steps = len(valid_generator) * valid_times,
+        #                          callbacks        = [early_stop, checkpoint, tensorboard], 
+        #                          workers          = 3,
+        #                          max_queue_size   = 8)      
 
         ############################################
         # Compute mAP on the validation set
         ############################################
-        average_precisions = self.evaluate(valid_generator)     
+        print()         
+        print('Valid Evaluate')         
+        average_precisions, timeHistory = self.evaluate(valid_generator)     
 
         # print evaluation
         for label, average_precision in average_precisions.items():
             print(self.labels[label], '{:.4f}'.format(average_precision))
-        print('mAP: {:.4f}'.format(sum(average_precisions.values()) / len(average_precisions)))         
+        print('Valid mAP: {:.4f}'.format(sum(average_precisions.values()) / len(average_precisions)))         
+
+        print()         
+        print('Total Images: ', len(timeHistory) )
+        print('Elapse Time: {:.4f}'.format( sum(timeHistory) ) )
+        print('Avg Image Time: {:.4f}'.format( sum(timeHistory)/len(timeHistory) ) )
+        print('FPS: ', int(1/(sum(timeHistory)/len(timeHistory))) )
+
+        print()         
+        print('Test Evaluate')         
+        average_precisions, timeHistory = self.evaluate(test_generator)     
+
+        # print evaluation
+        for label, average_precision in average_precisions.items():
+            print(self.labels[label], '{:.4f}'.format(average_precision))
+        print('Test mAP: {:.4f}'.format(sum(average_precisions.values()) / len(average_precisions)))         
+
+        timeHistory = timeHistory[1:]
+
+        print()         
+        print('Total Images: ', len(timeHistory) )
+        print('Elapse Time: {:.4f}'.format( sum(timeHistory) ) )
+        print('Avg Image Time: {:.4f}'.format( statistics.mean(timeHistory) ) )
+        print('Desvio Padrão: {:.4f}'.format( statistics.stdev(timeHistory) ) )
+        print('FPS: ', int(1/(sum(timeHistory)/len(timeHistory))) )
+
+        #print(timeHistory)
+
 
     def evaluate(self, 
                  generator, 
@@ -368,13 +403,17 @@ class YOLO(object):
         all_detections     = [[None for i in range(generator.num_classes())] for j in range(generator.size())]
         all_annotations    = [[None for i in range(generator.num_classes())] for j in range(generator.size())]
 
+        mAP = DetectionMAP(4,100,0.3)  # Initialise metric
+
+        timeHistory = []
         for i in range(generator.size()):
             raw_image = generator.load_image(i)
             raw_height, raw_width, raw_channels = raw_image.shape
 
             # make the boxes and the labels
+            start = time.time()
             pred_boxes  = self.predict(raw_image)
-
+            timeHistory.append(time.time() - start)
             
             score = np.array([box.score for box in pred_boxes])
             pred_labels = np.array([box.label for box in pred_boxes])        
@@ -383,7 +422,7 @@ class YOLO(object):
                 pred_boxes = np.array([[box.xmin*raw_width, box.ymin*raw_height, box.xmax*raw_width, box.ymax*raw_height, box.score] for box in pred_boxes])
             else:
                 pred_boxes = np.array([[]])  
-            
+
             # sort the boxes and the labels according to scores
             score_sort = np.argsort(-score)
             pred_labels = pred_labels[score_sort]
@@ -398,7 +437,23 @@ class YOLO(object):
             # copy detections to all_annotations
             for label in range(generator.num_classes()):
                 all_annotations[i][label] = annotations[annotations[:, 4] == label, :4].copy()
-                
+
+
+            # #===================================================
+            # # INICIO PR
+
+            # print(pred_boxes[:,0:4])
+            # print(pred_labels)
+            # print(score)
+            # print(annotations[:,0:4])
+            # print(annotations[:,4])
+
+            mAP.evaluate(pred_boxes[:,0:4], pred_labels, score, annotations[:,0:4], annotations[:,4])
+
+            # # FINAL PR
+            # #===================================================
+
+
         # compute mAP by comparing all detections and all annotations
         average_precisions = {}
         
@@ -456,7 +511,10 @@ class YOLO(object):
             average_precision  = compute_ap(recall, precision)  
             average_precisions[label] = average_precision
 
-        return average_precisions    
+        mAP.myPlot(self.labels)
+        plt.show()
+
+        return average_precisions, timeHistory    
 
     def predict(self, image):
         image_h, image_w, _ = image.shape

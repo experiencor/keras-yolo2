@@ -11,6 +11,51 @@ This repo contains the implementation of YOLOv2 in Keras with Tensorflow backend
 - [ ] Multiscale training
 - [ ] mAP Evaluation
 
+
+## Kabrau modifications:
+
+### Evaluation 
+
+Validation and test evaluate, by classes, mAP, FPS, and PR CURVE image
+- Important: Clone https://github.com/kabrau/mean_average_precision
+
+`python evaluate.py -c confg.json -w /path/to/best_weights.h5 -i /path/validation_images/ -a /path/validation_pascal_xml -j /path/test_images/ -t /path/test_pascal_xml`
+
+Example
+
+`python evaluate.py -c E:/rodney/configs/keras-yolo2/config.Inception3.json -w E:/rodney/weights/Inception3_V2c.h5 -i E:/rodney/DSDFinal/images/ -a E:/rodney/DSDFinal/split/validation/ -j E:/rodney/DSDFinal/images/ -t E:/rodney/DSDFinal/split/test/`
+
+Result example
+
+```
+Valid Evaluate
+ascending_stair 0.8334
+descending_stair 0.6084
+door 0.8277
+elevator_door 0.9268
+Valid mAP: 0.7991
+
+Total Images:  546
+Elapse Time: 11.0589
+Avg Image Time: 0.0203
+FPS:  49
+
+Test Evaluate
+ascending_stair 0.7365
+descending_stair 0.6934
+door 0.7482
+elevator_door 0.9024
+Test mAP: 0.7701
+
+Total Images:  535
+Elapse Time: 9.8113
+Avg Image Time: 0.0183
+Desvio Padrão: 0.0059
+FPS:  54
+```
+
+
+
 ## Some example applications (click for videos):
 
 ### Raccon detection
