@@ -81,7 +81,17 @@ def _main_(args):
             video_writer.write(np.uint8(image))
 
         video_reader.release()
-        video_writer.release()  
+        video_writer.release()
+    elif image_path == 'cam.0':
+        cam = cv2.VideoCapture(0)
+        while True:
+            ret_val, image = cam.read()
+            boxes = yolo.predict(image)
+            image = draw_boxes(image, boxes, config['model']['labels'])
+            cv2.imshow('my webcam', image)
+            if cv2.waitKey(1) == 27:
+                break
+        cv2.destroyAllWindows()
     else:
         image = cv2.imread(image_path)
         boxes = yolo.predict(image)
