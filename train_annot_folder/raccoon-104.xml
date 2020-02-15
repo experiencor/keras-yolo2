@@ -1,0 +1,26 @@
+<annotation verified="yes">
+	<folder>images</folder>
+	<filename>raccoon-104.jpg</filename>
+	<path>/Users/datitran/Desktop/raccoon/images/raccoon-104.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>600</width>
+		<height>304</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>raccoon</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>189</xmin>
+			<ymin>41</ymin>
+			<xmax>340</xmax>
+			<ymax>249</ymax>
+		</bndbox>
+	</object>
+</annotation>

@@ -57,6 +57,15 @@ def parse_annotation(ann_dir, img_dir, labels=[]):
                         
     return all_imgs, seen_labels
 
+def parse_annotation_json(ann_dir, img_dir, labels=[]):
+    all_imgs = []
+    seen_labels = []
+    
+    for ann in sorted(os.listdir(ann_dir)):
+        img = { 'object': [] }
+
+    pass
+
 class BatchGenerator(Sequence):
     def __init__(self, images, 
                        config, 
