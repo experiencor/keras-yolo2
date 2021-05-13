@@ -136,6 +136,10 @@ By the end of this process, the code will write the weights of the best model to
 
 It carries out detection on the image and write the image with detected bounding boxes to the same folder.
 
+or you can also detect the whole images in a directory by specifying the directory path (the path should end with "/")
+
+`python predict.py -c config.json -w /path/to/best_weights.h5 -i /path/to/image/folder/`
+
 ## Usage for jupyter notebook
 
 Refer to the notebook (https://github.com/experiencor/basic-yolo-keras/blob/master/Yolo%20Step-by-Step.ipynb) for a complete walk-through implementation of YOLOv2 from scratch (training, testing, and scoring).
